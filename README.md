@@ -99,3 +99,14 @@ How to use rest-doclet annotation
     
 
 
+ Generate rest api documentation
+ ====================================
+
+ mvn javadoc:javadoc -Pjavadoc
+ 
+ Tip
+ =====
+ - @RequestParam(required=false) - Please add 'required' to every RequestParam. It produces better DocRest. Value should be true or false.
+ 
+ - Optional readme-docrest.txt file directly under project directory will be used as top guideline of REST API
+       
