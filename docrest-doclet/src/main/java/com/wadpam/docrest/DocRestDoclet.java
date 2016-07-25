@@ -1377,21 +1377,24 @@ public class DocRestDoclet {
                     method.getPathVariables().add(param);
 
                 } else if ("org.springframework.web.bind.annotation.RequestBody".equals(type.qualifiedName())) {
-                    // param.setType(p.typeName());
+                 // param.setType(p.typeName());
                     // param.setJson(getJson(p.type().toString(), null));
                   //supportsClassParams true and param must genericEntity
                     if ((method.isSupportsClassParams() && "genericEntity".equals(param.getName()))
                             || "java.lang.Object".equals(p.type().qualifiedTypeName())) {
                         try {
                         param.setType(getJson(method.getReturnType(), method.getEntityType()));
+                        param.setType2(method.getReturnType());
                         } catch (Exception e) {
                             LOG.warning(method.getMethod() + " error : " + p.name() +  e.getMessage());
                             param.setType(getJson(p.type().qualifiedTypeName(), method.getEntityType()));
+                            param.setType2(p.type().qualifiedTypeName());
                         }
                     } else {
                         LOG.info(method.getMethod() + " : " + p.name() +  p.type().qualifiedTypeName());
                         
                         param.setType(getJson(p.type().qualifiedTypeName(), null));
+                        param.setType2(p.type().qualifiedTypeName());
                     }
 
                     for (ElementValuePair elementValue : paramAnnotation.elementValues()) {
@@ -1400,9 +1403,7 @@ public class DocRestDoclet {
                             param.setRequired(Boolean.valueOf(elementValue.value().toString()));
                         }
                     }
-                    // LOG.info(">>>>>>>>>>>>>>>>>> 1" + param.isRequired());
                     method.setBody(param);
-                    // method.getParameters().add(param);
                 } else if ("org.springframework.web.bind.annotation.RequestParam".equals(type.qualifiedName())) {
                     param.setType(p.typeName());
                     // update

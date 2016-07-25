@@ -11,9 +11,20 @@ package com.wadpam.docrest.domain;
 public class Param {
     private String name;
     private String type;
+    private String type2;
     private boolean required;
     private String  defaultValue;
-    private String comment;
+    private String  comment;
+    private String  json;
+
+
+    public String getJson() {
+        return json;
+    }
+
+    public void setJson(String json) {
+        this.json = json;
+    }
 
     public String getComment() {
         return comment;
@@ -37,6 +48,14 @@ public class Param {
 
     public void setType(String type) {
         this.type = type;
+    }
+    
+    public String getType2() {
+        return type2;
+    }
+
+    public void setType2(String type2) {
+        this.type2 = type2;
     }
 
     public boolean isRequired() {

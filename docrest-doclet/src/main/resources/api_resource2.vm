@@ -82,6 +82,29 @@
 #end
 
 ##################################################################
+## Create macro for change type request body
+##################################################################
+#macro( paramBodyType $entityType)
+    #if($entityType.toLowerCase() == "java.lang.string" || $entityType.toLowerCase() == "string")
+        "type" : "string"
+    #elseif($entityType.toLowerCase() == "java.lang.integer" || $entityType.toLowerCase() == "int")
+        "type":"integer", "format" : "int32"
+    #elseif($entityType.toLowerCase() == "java.lang.long" || $entityType.toLowerCase() == "long")
+        "type" : "integer", "format" : "int64"
+    #elseif ($entityType.toLowerCase() == "java.util.date" || $entityType.toLowerCase() == "date")
+        "type" : "string", "format" : "date"
+    #elseif($entityType.toLowerCase() == "java.lang.double" || $entityType.toLowerCase() == "double")
+        "type" : "number", "format" : "double"
+    #elseif($entityType.toLowerCase() == "java.lang.boolean" || $entityType.toLowerCase() == "boolean")
+        "type" : "boolean"    
+    #elseif($entityType.toLowerCase() == "java.lang.object" || $entityType.toLowerCase() == "java.lang.object.class")
+        "type" : "object"
+    #else
+        "$ref": "#/definitions/${entityType}"
+    #end
+#end
+
+##################################################################
 ## Create macro for status 200 
 ## return response object
 ##################################################################
@@ -197,20 +220,25 @@
                                         
                                         "parameters":[
                                         #set( $foo = "" )
+                                        #set( $IsHasParam = false )
                                         #foreach( $param in $method.pathVariables )
+                                            #set( $IsHasParam = true )
                                             #if( $velocityCount > 1),#end
                                                 {
                                                 "name": "${param.name.replace("{","").replace("}","")}",
                                                 "in": "path",
                                                 
                                                 #convertType(${param.type.toLowerCase()})
+                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r",""))
+                                                "description":"${paramComment}",
                                                 
-                                                "description": "${param.comment}",
                                                 "required": true
                                                 }
                                                 #set( $foo = "," )
                                         #end
+                                        
                                         #foreach( $param in $method.parameters )
+                                            #set( $IsHasParam = true )
                                             #if( $velocityCount > 1),#end
                                                 $foo
                                                 #set( $foo = "" )
@@ -219,12 +247,31 @@
                                                 "in" : "query",
                                                 
                                                 #convertType(${param.type.toLowerCase()})
+                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r",""))
+                                                "description":"${paramComment}",
                                                 
-                                                "description":"${param.comment}",
                                                 "required":false
                                                 
                                                 }
                                         #end
+                                        
+                                        #if( $method.body ) 
+                                            #if( $IsHasParam  ) , #end
+                                            {
+                                                "name": "${method.body.name}",
+                                                "in": "body",
+                                                "description": "${method.body.comment}",
+                                                "required": ${method.body.required},
+                                                "schema": {
+                                                    #paramBodyType(${method.body.type2})
+                                                }
+                                            }
+                                            
+                                        #end
+                                         
+                                         
+                                        
+                                        
                                         ],
                                         
                                         "responses" : {
@@ -334,20 +381,24 @@
                                    
                                         "parameters":[
                                         #set( $foo = "" )
+                                        #set( $IsHasParam = false )
                                         #foreach( $param in $method.pathVariables )
+                                            #set( $IsHasParam = true )
                                             #if( $velocityCount > 1),#end
                                                 {
                                                 "name": "${param.name.replace("{","").replace("}","")}",
                                                 "in": "path",
                                                 
                                                 #convertType(${param.type.toLowerCase()})
+                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r",""))
+                                                "description":"${paramComment}",
                                                 
-                                                "description": "${param.comment}",
                                                 "required": true
                                                 }
                                                 #set( $foo = "," )
                                         #end
                                         #foreach( $param in $method.parameters )
+                                            #set( $IsHasParam = true )
                                             #if( $velocityCount > 1),#end
                                                 $foo
                                                 #set( $foo = "" )
@@ -356,12 +407,31 @@
                                                 "in" : "query",
                                                 
                                                 #convertType(${param.type.toLowerCase()})
+                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r",""))
+                                                "description":"${paramComment}",
                                                 
-                                                "description":"${param.comment}",
                                                 "required":false
                                                 
                                                 }
                                         #end
+                                        
+                                        
+                                        #if( $method.body ) 
+                                            #if( $IsHasParam  ) , #end
+                                            {
+                                                "name": "${method.body.name}",
+                                                "in": "body",
+                                                "description": "${method.body.comment}",
+                                                "required": ${method.body.required},
+                                                "schema": {
+                                                  #paramBodyType(${method.body.type2})
+                                                }
+                                            }
+                                            
+                                        #end
+                                        
+                                        
+                                        
                                         ],
                                         
                                         "responses" : {
@@ -472,20 +542,23 @@
                                         
                                         "parameters":[
                                         #set( $foo = "" )
+                                        #set( $IsHasParam = false )
                                         #foreach( $param in $method.pathVariables )
+                                            #set( $IsHasParam = true )
                                             #if( $velocityCount > 1),#end
                                                 {
                                                 "name": "${param.name.replace("{","").replace("}","")}",
                                                 "in": "path",
                                                 
                                                 #convertType(${param.type.toLowerCase()})
-                                                
-                                                "description": "${param.comment}",
+                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r",""))
+                                                "description":"${paramComment}",
                                                 "required": true
                                                 }
                                                 #set( $foo = "," )
                                         #end
                                         #foreach( $param in $method.parameters )
+                                            #set( $IsHasParam = true )
                                             #if( $velocityCount > 1),#end
                                                 $foo
                                                 #set( $foo = "" )
@@ -500,6 +573,23 @@
                                                 
                                                 }
                                         #end
+                                        
+                                        
+                                        #if( $method.body ) 
+                                            #if( $IsHasParam  ) , #end
+                                            {
+                                                "name": "${method.body.name}",
+                                                "in": "body",
+                                                "description": "${method.body.comment}",
+                                                "required": ${method.body.required},
+                                                "schema": {
+                                                  #paramBodyType(${method.body.type2})
+                                                }
+                                            }
+                                            
+                                        #end
+                                        
+                                        
                                         ],
                                         
                                         "responses" : {
