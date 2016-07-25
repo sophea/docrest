@@ -1,0 +1,639 @@
+##################################################################
+## Create macro to get {*} attributes from array and 
+## return , seperated string
+##################################################################
+#macro( getGlobal $url $seperator)
+    #if($url.indexOf("{") != "-1")
+        #set($global = $url.substring($url.indexOf("{"),$url.indexOf("}")))
+        #set($global = $global.substring(1,$global.length()))
+        #if($global != "") $seperator$global #set($url = $url.replace("{${global}}","")) #getGlobal(${url} ",")
+        #end
+    #end
+#end
+
+##################################################################
+##  Create macro to convert data type
+##################################################################
+#macro(convertType $type)
+    
+    #if ($type == "java.util.date" || $type == "date")
+        "type" : "string", "format" : "date",
+    #elseif($type == "java.lang.integer" || $type == "int")
+        "type":"integer", "format" : "int32",
+    #elseif($type == "java.lang.long" || $type == "long")
+        "type" : "integer", "format" : "int64",
+    #elseif($type == "java.lang.double" || $type == "double")
+        "type" : "number", "format" : "double",
+    #elseif($type == "java.lang.boolean" || $type == "boolean")
+        "type" : "boolean",
+    #elseif($type == "java.lang.string" || $type == "string")
+        "type" : "string",
+    #elseif($type == "java.util.collection" || $type == "java.util.list")
+        "type" : "array", "items" : {},
+    #else
+        "type": "$type",
+    #end
+    
+#end
+
+##################################################################
+##  Create macro to convert object model data type
+##################################################################
+#macro(convertModelType $type $name $arrType) 
+    #if ($type.toLowerCase() == "java.util.date" || $type.toLowerCase() == "date")
+        "$name":{"type":"string", "format" : "date"}
+    #elseif($type.toLowerCase() == "java.lang.integer" || $type.toLowerCase() == "int")
+        "$name":{"type":"integer", "format" : "int32"}
+    #elseif($type.toLowerCase() == "java.lang.long" || $type.toLowerCase() == "long")
+        "$name":{"type" : "integer", "format" : "int64"}
+    #elseif($type.toLowerCase() == "java.lang.double" || $type.toLowerCase() == "double")
+        "$name":{"type" : "number", "format" : "double"}
+    #elseif($type.toLowerCase() == "java.lang.boolean" || $type.toLowerCase() == "boolean")
+        "$name":{"type" : "boolean"}
+    #elseif($type.toLowerCase() == "java.lang.string" || $type.toLowerCase() == "string")
+        "$name":{"type" : "string"}
+    #elseif($type.toLowerCase() == "java.util.collection" || $type.toLowerCase() == "java.util.list" || $type.toLowerCase() == "java.util.arraylist")
+        #if("" == $arrType)
+            "$name":{"type" : "array", "items" : {} }
+        #else
+            "$name":{
+                "type" : "array", "items" : {
+                    #if ($arrType.toLowerCase() == "java.util.date" || $arrType.toLowerCase() == "date")
+                        "type" : "string", "format" : "date"
+                    #elseif($arrType.toLowerCase() == "java.lang.integer" || $arrType.toLowerCase() == "int")
+                        "type":"integer", "format" : "int32"
+                    #elseif($arrType.toLowerCase() == "java.lang.long" || $arrType.toLowerCase() == "long")
+                        "type" : "integer", "format" : "int64"
+                    #elseif($arrType.toLowerCase() == "java.lang.double" || $arrType.toLowerCase() == "double")
+                        "type" : "number", "format" : "double"
+                    #elseif($arrType.toLowerCase() == "java.lang.boolean" || $arrType.toLowerCase() == "boolean")
+                        "type" : "boolean"
+                    #elseif($arrType.toLowerCase() == "java.lang.string" || $arrType.toLowerCase() == "string")
+                        "type" : "string"
+                    #else
+                        "$ref": "#/definitions/$arrType"
+                    #end
+                } 
+            }
+        #end
+    #else
+        "$name":{"$ref": "#/definitions/$type"}
+    #end
+#end
+
+##################################################################
+## Create macro for status 200 
+## return response object
+##################################################################
+#macro( getObject200 $entityType $returnType)
+    #if("org.springframework.http.ResponseEntity" != $returnType)
+        #if(${entityType} != ${returnType})
+            #set( $new_return = $returnType.replace("java.util.List<", "List[") )
+            #set( $new_return = $new_return.replace(">", "]") )
+            #if(${new_return} != ${returnType})
+                #set( $new_return = $new_return.replace("List[", "") )
+                #set( $new_return = $new_return.replace("]", "") )
+                
+                "schema": {
+                  "title": "${new_return}",
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/definitions/${new_return}"
+                  }
+                },
+            #else
+                "schema": {
+                
+                    #if($entityType.toLowerCase() == "java.lang.string" || $entityType.toLowerCase() == "string")
+                        "type" : "string"
+                    #elseif($entityType.toLowerCase() == "java.lang.integer" || $entityType.toLowerCase() == "int")
+                        "type":"integer", "format" : "int32"
+                    #elseif($entityType.toLowerCase() == "java.lang.long" || $entityType.toLowerCase() == "long")
+                        "type" : "integer", "format" : "int64"
+                    #elseif ($entityType.toLowerCase() == "java.util.date" || $entityType.toLowerCase() == "date")
+                        "type" : "string", "format" : "date"
+                    #elseif($entityType.toLowerCase() == "java.lang.double" || $entityType.toLowerCase() == "double")
+                        "type" : "number", "format" : "double"
+                    #elseif($entityType.toLowerCase() == "java.lang.boolean" || $entityType.toLowerCase() == "boolean")
+                        "type" : "boolean"    
+                    #elseif($entityType.toLowerCase() == "java.lang.object" || $entityType.toLowerCase() == "java.lang.object.class")
+                        "type" : "object"
+                    #else
+                        "$ref": "#/definitions/${entityType}"
+                    #end
+                    
+                },
+            #end
+        #else
+            "schema": {
+                
+                #if($entityType.toLowerCase() == "java.lang.string" || $entityType.toLowerCase() == "string")
+                    "type" : "string"
+                #elseif($entityType.toLowerCase() == "java.lang.integer" || $entityType.toLowerCase() == "int")
+                    "type":"integer", "format" : "int32"
+                #elseif($entityType.toLowerCase() == "java.lang.long" || $entityType.toLowerCase() == "long")
+                    "type" : "integer", "format" : "int64"
+                #elseif ($entityType.toLowerCase() == "java.util.date" || $entityType.toLowerCase() == "date")
+                    "type" : "string", "format" : "date"
+                #elseif($entityType.toLowerCase() == "java.lang.double" || $entityType.toLowerCase() == "double")
+                    "type" : "number", "format" : "double"
+                #elseif($entityType.toLowerCase() == "java.lang.boolean" || $entityType.toLowerCase() == "boolean")
+                    "type" : "boolean"
+                #elseif($entityType.toLowerCase() == "java.lang.object" || $entityType.toLowerCase() == "java.lang.object.class")
+                    "type" : "object"
+                #else
+                    "$ref": "#/definitions/${entityType}"
+                #end
+                
+            },
+        #end
+    #end
+    
+#end
+{
+"swagger": "2.0",
+"info": {
+    "title": "Rest API",
+    "version": "0.0.1",
+    "description": "This is a sample Rest API.",
+    "termsOfService": "http://swagger.io/terms/",
+    "contact":{
+        "name" : "API Support",
+        ## "email": "",
+        "url": "http://docrest.dminc-gtc.com/"
+        
+    },
+    "license" : {
+        "name": "MIT",
+        "url" : "https://opensource.org/licenses/MIT"
+    }
+},
+"host": "example.com",
+## "basePath": "${baseUrl}",
+"basePath": "/api",
+"schemes": [ "http", "https" ],
+"consumes": [ "application/json" ],
+"produces": [ "application/json" ],
+"paths": {
+#set($unique_identify = 0)
+#set($compare_path = "")
+#set($init = true)
+#foreach( $resource in $resources )
+        #foreach( $method in $resource.methods )
+                #foreach( $rp in $resource.paths )
+                        #foreach( $mp in $method.paths )
+                            #set($unique_identify = $unique_identify+1)
+                           
+                                #if($init == true ) 
+                                    #set($compare_path =  "/${rp}/${mp}")
+                                    "/${rp}/${mp}" : {
+                                        "${method.method.toLowerCase()}" : {
+                                        #set ( $commentText = $method.methodDoc.commentText().trim().replaceAll("\n","").replaceAll("\r",""))
+                                        ##"description": "${resource.classDoc.qualifiedName()}",
+                                        "description": "${commentText}",
+                                        "operationId": "${method.name}$unique_identify",
+                                        ##"summary":"${commentText}",
+                                        "summary" : "${method.highlightApiMessage}",
+                                        
+                                        "parameters":[
+                                        #set( $foo = "" )
+                                        #foreach( $param in $method.pathVariables )
+                                            #if( $velocityCount > 1),#end
+                                                {
+                                                "name": "${param.name.replace("{","").replace("}","")}",
+                                                "in": "path",
+                                                
+                                                #convertType(${param.type.toLowerCase()})
+                                                
+                                                "description": "${param.comment}",
+                                                "required": true
+                                                }
+                                                #set( $foo = "," )
+                                        #end
+                                        #foreach( $param in $method.parameters )
+                                            #if( $velocityCount > 1),#end
+                                                $foo
+                                                #set( $foo = "" )
+                                                {
+                                                "name":"${param.name}",
+                                                "in" : "query",
+                                                
+                                                #convertType(${param.type.toLowerCase()})
+                                                
+                                                "description":"${param.comment}",
+                                                "required":false
+                                                
+                                                }
+                                        #end
+                                        ],
+                                        
+                                        "responses" : {
+                                        
+                                        "default": {
+                                            "description": "Unexpected error"
+                                        }
+                                        
+                                        #set( $object200 = "#getObject200(${method.entityType} ${method.returnType})" )
+                                        #set( $foo = "," )
+                                        #foreach( $element in $method.restReturn.elementValues() )
+                                            #if( $element.element().name() == "code" )
+                                                #set( $codes = $element.value().value() )
+                                                #foreach( $code in $codes )
+                                                    #set( $responseMessage = "" )
+                                                    #foreach( $e in $code.value().elementValues() )
+                                                        #if( $e.element().name() == "code" ) #set( $responseCode = $e.value().value() ) #end
+                                                            #if( $e.element().name() == "description" ) #set( $responseDescription = $e.value().value() ) #end
+                                                                #if( $e.element().name() == "message" ) #set( $responseMessage = $e.value().value() ) #end
+                                                    #end
+                                                    
+                                                    $foo
+                                                        "${responseCode}" : {
+                                                            #if($responseCode=="200")
+                                                                    $object200
+                                                            #end
+                                                            
+                                                            "description" : "${responseMessage}"
+                                                        }
+                                                        
+                                                    #set( $foo = "," )
+                                                #end
+                                            #end
+                                            
+                                            #if( $element.element().name() == "codes" )
+                                                #set( $codes = $element.value().value() )
+                                                #foreach( $restCodes in $codes )
+                                                    #set( $responseMessage = "" )
+                                                    #foreach( $e in $restCodes.value().elementValues() )
+                                                        #if( $e.element().name() == "codes" )
+                                                            #set( $sortedResponseCodesAndDescriptions = $helper.sortString($e.value().value()))
+                                                            #set( $responseCodesAndDescriptions = $sortedResponseCodesAndDescriptions.split(",") )
+                                                            #foreach ($responseCodeAndDescription in $responseCodesAndDescriptions)
+                                                                #set( $codeAndDescriptionArray = $responseCodeAndDescription.split("=") )       
+                                                                #set( $responseCode = $codeAndDescriptionArray.get(0).trim() )
+                                                                #if ($codeAndDescriptionArray.size() > 1)
+                                                                    #set( $responseDescription = $codeAndDescriptionArray.get(1) )
+                                                                #else
+                                                                    #set( $responseDescription = false )
+                                                                #end
+                                                                
+                                                                $foo
+                                                                "${responseCode}" : {
+                                                                    #if("200" == $responseCode)    
+                                                                            $object200
+                                                                    #end
+                                                                    #if ( ${responseDescription} )
+                                                                        "description" : "${responseDescription}"
+                                                                    #else
+                                                                        #if ( "200" == ${responseCode} )
+                                                                            "description" : "Success"
+                                                                        #elseif ("201" == ${responseCode})
+                                                                            "description" : "Created"
+                                                                         #elseif ("204" == ${responseCode})
+                                                                            "description" : "No content"
+                                                                        #elseif ( "400" == ${responseCode} )
+                                                                            "description" : "The parameters provided are invalid"
+                                                                        #elseif ( "401" == ${responseCode} )
+                                                                            "description" : "You are not authenticated"
+                                                                        #elseif ( "403" == ${responseCode} )
+                                                                            "description" : "You are unauthorized for this action"
+                                                                        #elseif ( "404" == ${responseCode} )
+                                                                            "description" : "Object not found"
+                                                                        #elseif ( "409" == ${responseCode} )
+                                                                            "description" : "If doing a create, your request failed because this object already exists. If doing an update, your request failed because another user has modified this object since you last viewed it."
+                                                                        #elseif ( "500" == ${responseCode} )
+                                                                           "description" : "The server encountered an error"
+                                                                        #else
+                                                                            "description" : "Unknow"
+                                                                        #end
+                                                                     #end
+                                                                    
+                                                                }
+                                                        
+                                                                #set( $foo = "," )
+                                                            #end    
+                                                        #end        
+                                                    #end        
+                                                #end
+                                            #end
+                                            
+                                            
+                                        #end
+                                        
+                                        }
+                                        
+                                    }
+                                #end  ##<<<<<<<< End of init>>>>>> 
+                                
+                            
+                                #if( $compare_path == "/${rp}/${mp}" && $init == false ) , 
+                                    "${method.method.toLowerCase()}" : {
+                                        #set ( $commentText = $method.methodDoc.commentText().trim().replaceAll("\n","").replaceAll("\r",""))
+                                        "description": "${commentText}",
+                                        "operationId": "${method.name}$unique_identify",
+                                        "summary" : "${method.highlightApiMessage}",
+                                   
+                                        "parameters":[
+                                        #set( $foo = "" )
+                                        #foreach( $param in $method.pathVariables )
+                                            #if( $velocityCount > 1),#end
+                                                {
+                                                "name": "${param.name.replace("{","").replace("}","")}",
+                                                "in": "path",
+                                                
+                                                #convertType(${param.type.toLowerCase()})
+                                                
+                                                "description": "${param.comment}",
+                                                "required": true
+                                                }
+                                                #set( $foo = "," )
+                                        #end
+                                        #foreach( $param in $method.parameters )
+                                            #if( $velocityCount > 1),#end
+                                                $foo
+                                                #set( $foo = "" )
+                                                {
+                                                "name":"${param.name}",
+                                                "in" : "query",
+                                                
+                                                #convertType(${param.type.toLowerCase()})
+                                                
+                                                "description":"${param.comment}",
+                                                "required":false
+                                                
+                                                }
+                                        #end
+                                        ],
+                                        
+                                        "responses" : {
+                                        
+                                        "default": {
+                                            "description": "Unexpected error"
+                                        }
+                                        
+                                        #set( $object200 = "#getObject200(${method.entityType} ${method.returnType})" )
+                                        #set( $foo = "," )
+                                        #foreach( $element in $method.restReturn.elementValues() )
+                                            #if( $element.element().name() == "code" )
+                                                #set( $codes = $element.value().value() )
+                                                #foreach( $code in $codes )
+                                                    #set( $responseMessage = "" )
+                                                    #foreach( $e in $code.value().elementValues() )
+                                                        #if( $e.element().name() == "code" ) #set( $responseCode = $e.value().value() ) #end
+                                                            #if( $e.element().name() == "description" ) #set( $responseDescription = $e.value().value() ) #end
+                                                                #if( $e.element().name() == "message" ) #set( $responseMessage = $e.value().value() ) #end
+                                                    #end
+                                                    
+                                                    $foo
+                                                        "${responseCode}" : {
+                                                            #if($responseCode=="200")
+                                                                    $object200
+                                                            #end
+                                                            
+                                                            "description" : "${responseMessage}"
+                                                        }
+                                                        
+                                                    #set( $foo = "," )
+                                                #end
+                                            #end
+                                            
+                                            #if( $element.element().name() == "codes" )
+                                                #set( $codes = $element.value().value() )
+                                                #foreach( $restCodes in $codes )
+                                                    #set( $responseMessage = "" )
+                                                    #foreach( $e in $restCodes.value().elementValues() )
+                                                        #if( $e.element().name() == "codes" )
+                                                            #set( $sortedResponseCodesAndDescriptions = $helper.sortString($e.value().value()))
+                                                            #set( $responseCodesAndDescriptions = $sortedResponseCodesAndDescriptions.split(",") )
+                                                            #foreach ($responseCodeAndDescription in $responseCodesAndDescriptions)
+                                                                #set( $codeAndDescriptionArray = $responseCodeAndDescription.split("=") )       
+                                                                #set( $responseCode = $codeAndDescriptionArray.get(0).trim() )
+                                                                #if ($codeAndDescriptionArray.size() > 1)
+                                                                    #set( $responseDescription = $codeAndDescriptionArray.get(1) )
+                                                                #else
+                                                                    #set( $responseDescription = false )
+                                                                #end
+                                                                
+                                                                $foo
+                                                                "${responseCode}" : {
+                                                                    #if("200" == $responseCode)    
+                                                                            $object200
+                                                                    #end
+                                                                    #if ( ${responseDescription} )
+                                                                        "description" : "${responseDescription}"
+                                                                    #else
+                                                                        #if ( "200" == ${responseCode} )
+                                                                            "description" : "Success"
+                                                                        #elseif ("201" == ${responseCode})
+                                                                            "description" : "Created"
+                                                                         #elseif ("204" == ${responseCode})
+                                                                            "description" : "No content"
+                                                                        #elseif ( "400" == ${responseCode} )
+                                                                            "description" : "The parameters provided are invalid"
+                                                                        #elseif ( "401" == ${responseCode} )
+                                                                            "description" : "You are not authenticated"
+                                                                        #elseif ( "403" == ${responseCode} )
+                                                                            "description" : "You are unauthorized for this action"
+                                                                        #elseif ( "404" == ${responseCode} )
+                                                                            "description" : "Object not found"
+                                                                        #elseif ( "409" == ${responseCode} )
+                                                                            "description" : "If doing a create, your request failed because this object already exists. If doing an update, your request failed because another user has modified this object since you last viewed it."
+                                                                        #elseif ( "500" == ${responseCode} )
+                                                                           "description" : "The server encountered an error"
+                                                                        #else
+                                                                            "description" : "Unknow"
+                                                                        #end
+                                                                     #end
+                                                                    
+                                                                }
+                                                        
+                                                                #set( $foo = "," )
+                                                            #end    
+                                                        #end        
+                                                    #end        
+                                                #end
+                                            #end
+                                            
+                                            
+                                        #end
+                                        
+                                        }
+                                        
+                                    } 
+                                    
+                                #elseif ( $compare_path != "/${rp}/${mp}")
+                                     #set($compare_path =  "/${rp}/${mp}")
+                                     },
+                                     "/${rp}/${mp}" : {
+                                        "${method.method.toLowerCase()}" : {
+                                        #set ( $commentText = $method.methodDoc.commentText().trim().replaceAll("\n","").replaceAll("\r",""))
+                                        "description": "${commentText}",
+                                        "operationId": "${method.name}$unique_identify",
+                                        "summary" : "${method.highlightApiMessage}",
+                                        
+                                        "parameters":[
+                                        #set( $foo = "" )
+                                        #foreach( $param in $method.pathVariables )
+                                            #if( $velocityCount > 1),#end
+                                                {
+                                                "name": "${param.name.replace("{","").replace("}","")}",
+                                                "in": "path",
+                                                
+                                                #convertType(${param.type.toLowerCase()})
+                                                
+                                                "description": "${param.comment}",
+                                                "required": true
+                                                }
+                                                #set( $foo = "," )
+                                        #end
+                                        #foreach( $param in $method.parameters )
+                                            #if( $velocityCount > 1),#end
+                                                $foo
+                                                #set( $foo = "" )
+                                                {
+                                                "name":"${param.name}",
+                                                "in" : "query",
+                                                
+                                                #convertType(${param.type.toLowerCase()})
+                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r",""))
+                                                "description":"${paramComment}",
+                                                "required":false
+                                                
+                                                }
+                                        #end
+                                        ],
+                                        
+                                        "responses" : {
+                                        
+                                        "default": {
+                                            "description": "Unexpected error"
+                                        }
+                                        
+                                        #set( $object200 = "#getObject200(${method.entityType} ${method.returnType})" )
+                                        #set( $foo = "," )
+                                        #foreach( $element in $method.restReturn.elementValues() )
+                                            #if( $element.element().name() == "code" )
+                                                #set( $codes = $element.value().value() )
+                                                #foreach( $code in $codes )
+                                                    #set( $responseMessage = "" )
+                                                    #foreach( $e in $code.value().elementValues() )
+                                                        #if( $e.element().name() == "code" ) #set( $responseCode = $e.value().value() ) #end
+                                                            #if( $e.element().name() == "description" ) #set( $responseDescription = $e.value().value() ) #end
+                                                                #if( $e.element().name() == "message" ) #set( $responseMessage = $e.value().value() ) #end
+                                                    #end
+                                                    
+                                                    $foo
+                                                        "${responseCode}" : {
+                                                            #if($responseCode=="200")
+                                                                    $object200
+                                                            #end
+                                                            
+                                                            "description" : "${responseMessage}"
+                                                        }
+                                                        
+                                                    #set( $foo = "," )
+                                                #end
+                                            #end
+                                            
+                                            #if( $element.element().name() == "codes" )
+                                                #set( $codes = $element.value().value() )
+                                                #foreach( $restCodes in $codes )
+                                                    #set( $responseMessage = "" )
+                                                    #foreach( $e in $restCodes.value().elementValues() )
+                                                        #if( $e.element().name() == "codes" )
+                                                            #set( $sortedResponseCodesAndDescriptions = $helper.sortString($e.value().value()))
+                                                            #set( $responseCodesAndDescriptions = $sortedResponseCodesAndDescriptions.split(",") )
+                                                            #foreach ($responseCodeAndDescription in $responseCodesAndDescriptions)
+                                                                #set( $codeAndDescriptionArray = $responseCodeAndDescription.split("=") )       
+                                                                #set( $responseCode = $codeAndDescriptionArray.get(0).trim() )
+                                                                #if ($codeAndDescriptionArray.size() > 1)
+                                                                    #set( $responseDescription = $codeAndDescriptionArray.get(1) )
+                                                                #else
+                                                                    #set( $responseDescription = false )
+                                                                #end
+                                                                
+                                                                $foo
+                                                                "${responseCode}" : {
+                                                                    #if("200" == $responseCode)    
+                                                                            $object200
+                                                                    #end
+                                                                    #if ( ${responseDescription} )
+                                                                        "description" : "${responseDescription}"
+                                                                    #else
+                                                                        #if ( "200" == ${responseCode} )
+                                                                            "description" : "Success"
+                                                                        #elseif ("201" == ${responseCode})
+                                                                            "description" : "Created"
+                                                                         #elseif ("204" == ${responseCode})
+                                                                            "description" : "No content"
+                                                                        #elseif ( "400" == ${responseCode} )
+                                                                            "description" : "The parameters provided are invalid"
+                                                                        #elseif ( "401" == ${responseCode} )
+                                                                            "description" : "You are not authenticated"
+                                                                        #elseif ( "403" == ${responseCode} )
+                                                                            "description" : "You are unauthorized for this action"
+                                                                        #elseif ( "404" == ${responseCode} )
+                                                                            "description" : "Object not found"
+                                                                        #elseif ( "409" == ${responseCode} )
+                                                                            "description" : "If doing a create, your request failed because this object already exists. If doing an update, your request failed because another user has modified this object since you last viewed it."
+                                                                        #elseif ( "500" == ${responseCode} )
+                                                                           "description" : "The server encountered an error"
+                                                                        #else
+                                                                            "description" : "Unknow"
+                                                                        #end
+                                                                     #end
+                                                                    
+                                                                }
+                                                        
+                                                                #set( $foo = "," )
+                                                            #end    
+                                                        #end        
+                                                    #end        
+                                                #end
+                                            #end
+                                            
+                                            
+                                        #end
+                                        
+                                        }
+                                        
+                                    }
+                                        
+                                #end    ## <<<<<<<<<<<< End of elseif >>>>>>>>>>>
+                              
+                                #set($init = false)                 
+                               
+                              ##if( $foreach.hasNext), #end     
+                        #end
+                        ##if( $foreach.hasNext), #end
+                #end
+               ##if( $foreach.hasNext), #end
+        #end
+       ##if( $foreach.hasNext ), #end
+#end
+}
+},
+"definitions":{
+#foreach( $entry in $jsonDoc.entrySet() )
+    #if( $velocityCount > 1),#end
+        "${entry.value}":{
+        "type": "object",
+        "properties":{
+        #set( $className = $entry.key )
+        #set( $jd = $entry.value )
+        #set( $foo = "" )
+        #foreach( $m in $jd.methods(false) )
+            #if( $helper.isGetter($m.name()) )
+                #set( $memberName = $helper.getMemberName($m.name()) )
+                #set( $memberType = $m.returnType().qualifiedTypeName() )
+                #set( $strArrayType = ${helper.renderTypeWithDetailObjectExtraJson2($memberType, $className,$m)})
+                #set( $new_member = "#convertModelType($memberType $memberName $strArrayType)")
+                $foo$new_member
+                
+                #set( $foo = "," )
+            #end
+        #end
+        }
+        }
+#end
+}
+}

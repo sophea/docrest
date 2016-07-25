@@ -4,11 +4,12 @@
  */
 package com.wadpam.docrest.test;
 
+
 /**
  *
  * @author os
  */
-public class Location {
+public class Location extends VenueParent {
     /** Latitude is South/North distance from equator in degrees, [-90.0 .. 90.0] */
     private double latitude;
     /** Latitude is West/East distance from Greenwich Meridian in degrees, [-180.0 .. 180.0] */

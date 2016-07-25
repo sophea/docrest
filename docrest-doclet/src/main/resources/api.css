@@ -8,6 +8,16 @@ body {
 h1 {
 	color: #b2d33a;
 	font-size: 28px;
+	font-weight: bold;
+	margin-top :18.760px;
+}
+
+h1 ~ pre {
+	padding : 0;
+	margin: 1em 0px 1em;
+	background-color: #fff;
+	border: none;
+	
 }
 
 h1.resourceHeader {
@@ -20,11 +30,30 @@ h1.resourceHeader {
 
 h2.methodHeader {
 	color: #b2d33a;
-	font-size: 3ex;
+	font-size: 4ex;
 	font-weight: bold;
 	font-family: "Courier New", Courier, mono;
 	margin: 36px 0px 0px 0px ;
 	padding: 0px;
+}
+
+.trait {
+	color: white;
+    font-size: 0.7em;
+    background-color: darkcyan;
+    padding-left: 5;
+    padding-right: 5;
+    vertical-align: middle;
+    border-radius: 2px;
+}
+
+.trait2 {
+	color: #b2d33a;
+    font-size: 0.7em;
+    background-color: white;
+    padding-left: 2;
+    padding-right: 2;
+    vertical-align: middle;
 }
 
 h3 {
@@ -39,18 +68,22 @@ h3 {
 a {
 	color: #0bd;
 	text-decoration: none;
-	font-size: 1.8ex;
+	font-size: 1.9ex;
 	padding-top: 0;
 	margin-top: 0;
 }
-
+li > a {
+	color: #0bd;
+	text-decoration: none;
+	font-size: 2.1ex;
+}
 a:hover {
 	text-decoration: underline;
 }
 
 /***** End: Links *****/
 /***** Start: Links *****/
-ul {
+ul{
 	color: #0bd;
 }
 
@@ -63,7 +96,7 @@ li {
 
 p {
 	color: #878787;
-	font-size: 1.5ex;
+	font-size: 1.7ex;
 	margin: 0px;
 	padding: 0px;
 }
@@ -144,9 +177,171 @@ tbody td {
 
 }
 
+.column4 {
+    width: 100px;
+    font-size: 1.5ex;
+    text-align: center;
+
+}
+
+.column5 {
+    width: 100px;
+    font-size: 1.5ex;
+    text-align: center;
+
+}
+
 .columnAuto {
 	width: auto;
 	font-size: 1.5ex;
 }
 
 /***** End: Tables *****/
+
+/***** bold tag *****/
+li > b {
+	font-weight: bold;
+	font-size: 17px;
+}
+/****** End: bold tag *****/
+
+/****** Api tools *****/
+
+.row , .api{
+    margin-top: 15px;
+}     
+.api, .x_wwww_form, .request_body, .response_body, .requestUrl, .serverUrls {
+    display: none;
+}
+.GET {
+    color: white;
+    font-size: 0.7em;
+    background-color: #0f6ab4;
+    padding-left: 5;
+    padding-right: 5;
+    vertical-align: middle;
+    border-radius: 2px; 
+}
+.POST {
+    color: white;
+    font-size: 0.7em;
+    background-color: #10a54a;
+    padding-left: 5;
+    padding-right: 5;
+    vertical-align: middle;
+    border-radius: 2px;
+}
+.PUT {
+    color: white;
+    font-size: 0.7em;
+    background-color: #c5862b;
+    padding-left: 5;
+    padding-right: 5;
+    vertical-align: middle;
+    border-radius: 2px;
+}
+
+.DELETE {
+    color: white;
+    font-size: 0.7em;
+    background-color: #a41e22;
+    padding-left: 5;
+    padding-right: 5;
+    vertical-align: middle;
+    border-radius: 2px;
+}
+/****** End: Api tools *****/
+
+
+/****** Modal Dialog ******/
+.modal-header, h4 {
+      background-color: #b2d33a;
+      color:white !important;
+      text-align: center;
+      font-size: 20px;
+}
+.modal-body {
+    padding: 0 !important;
+}
+.modal-footer {
+      background-color: #f9f9f9;
+}
+.modal-content {
+    border-radius: 0 !important;
+}
+.modal-title {
+    margin: 0;
+    line-height: 1;
+}
+
+.btn-dialog-popup {
+    position: fixed;
+    top: 18px; right: 10px;
+    outline:none !important;
+    color: #b2d33a !important;
+    border-color: #b2d33a !important;
+    z-index: 1;
+    background-color: #fff !important;
+}
+.btn-dialog-popup:hover {
+    color: #fff !important;
+    background-color: #b2d33a !important;
+    border-color: #9abf12 !important;
+}
+
+.authorization-dialog .row {
+    margin-top:10px;
+}
+#verifyUserAccountCredentialsTypeResponse, #verifyLoginResponse, .authorization-dialog{
+	display:none;
+}
+/****** End: Modal Dialog ******/
+
+/****** API Path Hidden******/
+ul > li .api-path {
+	display :none; 
+	width : 85% ;
+}
+.api-path .api {
+	color :black;
+	background-color : #fcf6db;
+	border: 1px solid #e5e0c6;
+}
+.api-path > pre {
+	background-color : #fcf6db;
+	border: 1px solid #e5e0c6;
+}
+
+ul > li .api-path-delete {
+	background-color: #f5e8e8;
+    border: 1px solid #e8c6c7;
+}
+
+ul > li .api-path-get {
+	background-color: #e7f0f7;
+    border: 1px solid #c3d9ec;
+}
+
+ul > li .api-path-post {
+	background-color: #e7f6ec;
+    border: 1px solid #c3e8d1;
+}
+
+ul > li .api-path-put {
+	background-color: #f9f2e9;
+    border: 1px solid #f0e0ca;
+}
+
+.api-path-delete thead {
+	background-color: #a41e22;
+}
+.api-path-get thead {
+	background-color: #0f6ab4;
+}
+.api-path-post thead {
+	background-color: #10a54a;
+}
+.api-path-put thead {
+	background-color: #c5862b;
+}
+/****** End: API Path Hidden ******/
