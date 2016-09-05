@@ -49,11 +49,18 @@
             <email>leepritchard@live.com</email>
             <url>http://www.linkedin.com/in/LeePritchard1983</url>
         </developer>
+        <developer>
+            <id>Sophea</id>
+            <name>Sophea MAK</name>
+            <email>sopheamak@gmail.com</email>
+            <url>http://www.linkedin.com/in/sopheamak</url>
+        </developer>
+
     </developers>
 
     <scm>
-        <url>https://github.com/sosandstrom/docrest</url>
-        <developerConnection>scm:git:ssh://git@github.com/sosandstrom/docrest.git</developerConnection>
+        <url>https://github.com/sophea/docrest</url>
+        <developerConnection>scm:git:ssh://git@github.com/sophea/docrest.git</developerConnection>
     </scm>
     
     <profiles>
