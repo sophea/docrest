@@ -55,9 +55,9 @@
     <distributionManagement>
         
         <repository>
-                <id>bintray-sopheamak-open_repo</id>
+                <id>bintray-sopheamak-maven_repo</id>
                 <name>sopheamak-open_repo</name>
-                <url>https://api.bintray.com/maven/sopheamak/open_repo/docrest;publish=1</url>
+                <url>https://api.bintray.com/maven/sopheamak/maven_repo/docrest;publish=1</url>
         </repository>
 
 
