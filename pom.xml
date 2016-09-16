@@ -60,6 +60,18 @@
                 <url>https://api.bintray.com/maven/sopheamak/maven_repo/docrest;publish=1</url>
         </repository>
 
+	    <distributionManagement>
+	   <repository>
+            <id>sophea-github-releases</id>
+            <name>Sophea GitHub releases repo</name>
+            <url>file:../mvn-repo/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>sophea-github-snapshots</id>
+            <name>Sophea GitHub snapshots repo</name>
+            <url>file:../mvn-repo/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     </distributionManagement>
 
