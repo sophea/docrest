@@ -28,18 +28,7 @@
     </build>
 
     <distributionManagement>
-        <repository>
-            <id>sosandstrom-github-releases</id>
-            <name>sosandstrom GitHub releases repo</name>
-            <url>file:../mvn-repo/releases</url>
-        </repository>
-
-        <snapshotRepository>
-            <id>sosandstrom-github-snapshots</id>
-            <name>sosandstrom GitHub snapshots repo</name>
-            <url>file:../mvn-repo/snapshots</url>
-        </snapshotRepository>
-
+        
         <repository>
                 <id>bintray-sopheamak-open_repo</id>
                 <name>sopheamak-open_repo</name>
