@@ -33,13 +33,27 @@
             <name>sosandstrom GitHub releases repo</name>
             <url>file:../mvn-repo/releases</url>
         </repository>
+
         <snapshotRepository>
             <id>sosandstrom-github-snapshots</id>
             <name>sosandstrom GitHub snapshots repo</name>
             <url>file:../mvn-repo/snapshots</url>
         </snapshotRepository>
+
+        <repository>
+                <id>bintray-sopheamak-open_repo</id>
+                <name>sopheamak-open_repo</name>
+                <url>https://api.bintray.com/maven/sopheamak/open_repo/docrest/;publish=1</url>
+        </repository>
+
+
     </distributionManagement>
 
+
+
+
+
+	
     <licenses>
         <license>
             <name>GPL v3</name>
