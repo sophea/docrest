@@ -4,7 +4,7 @@
     <groupId>com.wadpam</groupId>
     <artifactId>docrest</artifactId>
     <packaging>pom</packaging>
-    <version>1.27-SNAPSHOT</version>
+    <version>1.27</version>
     <name>${project.groupId}:${project.artifactId}</name>
     
     <description>A javadoc doclet to create REST-JSON API specs</description>
@@ -77,7 +77,7 @@
     <scm>
         <url>https://github.com/sophea/docrest</url>
         <developerConnection>scm:git:ssh://git@github.com/sophea/docrest.git</developerConnection>
-      <tag>HEAD</tag>
+      <tag>docrest-1.27</tag>
   </scm>
     
     <profiles>
