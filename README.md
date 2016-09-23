@@ -1,5 +1,6 @@
 ![Travis Build](https://travis-ci.org/sophea/docrest.svg?branch=master)
 [![Codecov](https://codecov.io/github/sophea/docrest/coverage.svg?branch=master)](https://codecov.io/github/sophea/docrest?branch=master)
+![Java 7 required](https://img.shields.io/badge/java-7-brightgreen.svg)
 
 docrest
 =======
