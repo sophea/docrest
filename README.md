@@ -1,3 +1,5 @@
+![Travis Build](https://travis-ci.org/sophea/docrest.svg?branch=master)
+
 docrest
 =======
 
@@ -13,17 +15,15 @@ To use DocRest in a project please make the following changes to pom.xml:
        <dependency>
             <groupId>com.wadpam</groupId>
             <artifactId>docrest-api</artifactId>
-            <version>1.23</version>
+            <version>1.31</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.wadpam</groupId>
             <artifactId>docrest-doclet</artifactId>
-            <version>1.23</version>
+            <version>1.31</version>
             <scope>compile</scope>
         </dependency>
-        
-
 
                   <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
@@ -110,4 +110,3 @@ How to use rest-doclet annotation
  
  - Optional readme-docrest.txt file directly under project directory will be used as top guideline of REST API
        
-https://travis-ci.org/sophea/docrest.svg?branch=master
