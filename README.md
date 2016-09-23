@@ -110,3 +110,4 @@ How to use rest-doclet annotation
  
  - Optional readme-docrest.txt file directly under project directory will be used as top guideline of REST API
        
+https://travis-ci.org/sophea/docrest.svg?branch=master
