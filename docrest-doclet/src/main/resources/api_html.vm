@@ -4,11 +4,13 @@
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.5.12/clipboard.min.js"></script>
         <link rel="stylesheet" href="api.css" type="text/css" />
         <script src="api-tool-populator.js" type="text/javascript"></script>
         <script src="api-tool.js" type="text/javascript"></script>
     </head>
     <body>
+        <div style=" max-width: 90%;margin-left: auto;margin-right: auto;align:center">
         <!-- Table of Contents ---------------------------------------------------->
         <h1>Rest API</h1>
         <p>
@@ -21,663 +23,367 @@
          Date:$date
         </p>
 
-	     #if( ${readme} )
-	        <p>
-	            ${readme}
-	        </p>
-	     #end 
+         #if( ${readme} )
+            <p>
+                ${readme}
+            </p>
+         #end 
         <div class = "authorization-dialog"></div>   
-        <ul>
+        <ul class="restAPIs">
             #set( $index = 0 )
+            #set( $i = 0 )
+            #set( $restPath = "" )
             #foreach( $resource in $resources )
-                <li>
+                  #set( $oldIndex = $i % $2 )
+                  #if( $oldIndex == 0)
+                    <li class="main">
+                  #else
+                   <li class="main_odd"> 
+                  #end
+                  #set( $i = $i +1 )
+                
                     #foreach( $rp in $resource.paths )
-                        #if( $velocityCount > 1),&nbsp;#end <a href="api.html#${resource.classDoc.qualifiedName()}" class="link"> #if($rp == "/" || $rp=="") /#else /${rp}#end <!--/${rp}--></a>
+                       
+                        #if( $velocityCount > 1),&nbsp;#end <a class="link api-slide-toggle_one_level"> #if($rp == "/" || $rp=="") /#else /${rp}#end <!--/${rp}--></a>
+                        
                     #end
-                    <ul>
+                    <ul class="restAPIs"> #* main group {domain} *#
                         #foreach( $method in $resource.methods )
-                            <li>
-                               #* <a href="api.html#${resource.classDoc.qualifiedName()}.${method.name}" class="link"> *#
-                                  <a class="link api-slide-toggle">
-                                    #foreach( $rp in $resource.paths )
-                                        #if( $velocityCount > 1),&nbsp;#end
-                                            #foreach( $mp in $method.paths )
-                                                #if( $velocityCount > 1),&nbsp;#end
-                                                     #if($rp == "/" || $rp=="") /${mp} #else /${rp}/${mp}#end <!--/${rp}/${mp}-->
-                                            #end
-                                    #end
-                                    <!--background-color: #10a54a; -->
-                                    <span class="${method.method}">${method.method}</span>
-                                     #foreach ( $trait in $method.traits )
-                                        <span class="trait">${trait}</span>
-                                    #end
-                                </a> <b style='color: red'>${method.highlightApiMessage}</b>
-                               
                                 #set ($methodST = ${method.method})
                                 #set ($methodST = $methodST.split(", "))
-							    <div class = "well api-path api-path-$methodST.get(0).toLowerCase()">
-							    	#set( $index = $index + 1 )
-					                #set( $restPath = "" )
-					                <!-- Method: ${method.name} ---------------------------------------------------->		
-					                <a name="${resource.classDoc.qualifiedName()}.${method.name}" ></a>
-					                <h2 class="methodHeader">
-					                    <span>
-					                        <b>REST path</b>
-					                        :
-					                        #foreach( $rp in $resource.paths )
-					                            #if( $velocityCount > 1),&nbsp;#end
-					                                #foreach( $mp in $method.paths )
-					                                    #if( $velocityCount > 1),&nbsp;#end
-					                                        #if($rp == "/" || $rp=="") 
-					                                        	/${mp}
-					                                        	#set( $restPath = "/${mp}" ) 
-					                                        #else 
-					                                        	/${rp}/${mp}
-					                                        	#set( $restPath = "/${rp}/${mp}" )
-					                                     	#end <!--/${rp}/${mp} -->
-					                                #end
-					                        #end
-					                        <!--&nbsp;--> <span class="${method.method}">${method.method}</span>
-					                        #foreach ( $trait in $method.traits )
-					                            <span class="trait">${trait}</span>
-					                        #end
-					                    </span>
-					                <b style='color: red;font-size:small'>${method.highlightApiMessage}</b>
-					                </h2>
-					                <p>
-					                    <b>Description</b>
-					                    :${method.methodDoc.commentText()}
-					                </p>
-					                #foreach( $since in $method.methodDoc.tags("@since") )
-					                    <p>
-					                        <b>Since</b>
-					                        :${since.text()}
-					                    </p>
-					                #end
-					                #if (${method.contentType} !="")
-					                <p>
-					                 <b>Content-Type</b>: ${method.contentType}
-					                </p>
-					                #end
-					                
-					                <!-- add TEST API tool here-->
-					                <a class="api-toggle btn btn-info btn-xs" role="button" id = "${index}" data-request-method="${method.method}" data-path="${restPath}" data-table-index = "restAPI_${index}">TEST API</a>
-					                
-					                <h3>Request parameters</h3>
-					                <table id="restAPI_${index}">
-					                    <thead>
-					                        <th class="column1">Param Type</th>
-					                        <th class="column2">Name</th>
-					                        <th class="column3">Type</th>
-					                        <th class="column4">Required</th>
-					                        <th class="column5">Default Value</th>
-					                        <th class="columnAuto">Description</th>
-					                    </thead>
-					                    <tbody>
-					                        #set( $hasNoRows = true )
-					                        #foreach( $param in $method.pathVariables )
-					                            #set( $hasNoRows = false )
-					                            <tr>
-					                                <td>path param</td>
-					                                <td>${param.name}</td>
-					                                <td>${param.type}</td>
-					                                <td></td>
-					                                <td></td>
-					                                <td>${param.comment}</td>
-					                            </tr>
-					                        #end
-					                        #foreach( $param in $method.parameters )
-					                            #set( $hasNoRows = false )
-					                            <tr>
-					                                <td>query param</td>
-					                                <td id="param_${index}_${param.name}">${param.name}</td>
-					                                <td>${param.type}</td>
-					                                <td style="text-align: center; padding: 0;">
-					                                    #if (${param.required})
-					                                        X
-					                                    #end
-					                                </td>
-					                                <td style="text-align: center; padding: 0;" id="value_param_${index}_${param.name}">
-					                                    #set( $defaultValue = ${param.defaultValue} )
-					                                    #set( $defaultValue = $defaultValue.replace('"','')) 
-					                                    $defaultValue
-					                                </td>
-					                                <td>${param.comment}</td>
-					                            </tr>
-					                            
-					                        #end
-					                        
-					                        #if( $method.isSupportsClassParams() )
-					                            #foreach( $tag in $resource.classDoc.tags("@param") )
-					                                #set( $nameIndex = $tag.text().indexOf(" ") )
-					                                #set( $typeIndex = $tag.text().lastIndexOf(" ") )
-					                                <tr>
-					                                    <td>query (resource)</td>
-					                                    <td>${tag.text().substring(0, $nameIndex)}</td>
-					                                    <td>${tag.text().substring($typeIndex)}</td>
-					                                    <td></td>
-					                                    <td></td>
-					                                    <td>${tag.text().substring($nameIndex, $typeIndex)}</td>
-					                                </tr>
-					                            #end
-					                        #end
-					                        #if( $method.body )
-					                            #set( $hasNoRows = false )
-					                            <tr>
-					                                <td>body</td>
-					                                <td>${method.body.name}</td>
-					                                <td>${helper.renderType($method.body.type)}</td>
-					                                <td style="text-align: center; padding: 0;"> 
-					                                	#if (${method.body.required})
-					                                        X
-					                                    #end</td>
-					                                <td style="text-align: center; padding: 0;">
-					                                	#set( $defaultValue = ${method.body.defaultValue} )
-					                                    #set( $defaultValue = $defaultValue.replace('"','')) 
-					                                    $defaultValue
-					                                </td>
-					                                <td>${method.body.comment}</td>
-					                            </tr>
-					                        #end
-					                        #foreach( $param in $method.modelAttributes )
-					                            #set( $hasNoRows = false )
-					                            <tr>
-					                                <td>body (properties separately)</td>
-					                                <td>${param.name}</td>
-					                                <td>${param.type}</td>
-					                                <td></td>
-					                                <td></td>
-					                                <td>${param.comment}</td>
-					                            </tr>
-					                        #end
-					                        #if( $hasNoRows )
-					                            <tr>
-					                                <td>-</td>
-					                                <td>-</td>
-					                                <td>-</td>
-					                                <td>-</td>
-					                                <td>-</td>
-					                                <td>-</td>
-					                            </tr>
-					                        #end
-					                    </tbody>
-					                </table>
-					                <h3>Response Codes</h3>
-					                <table>
-					                    <thead>
-					                        <td class="column1">HTTP Response Code</td>
-					                        <td class="columnAuto">Description</td>
-					                    </thead>
-					                    <tbody>
-					                        #set( $hasNoRows = true )
-					                        #foreach( $element in $method.restReturn.elementValues() )
-					                            #if( $element.element().name() == "code" )
-					                                #set( $code = $element.value().value() )
-					                                #foreach( $restCode in $code )
-					                                    #set( $responseMessage = "" )
-					                                    #foreach( $e in $restCode.value().elementValues() )
-					                                        #if( $e.element().name() == "code" ) #set( $responseCode = $e.value().value() ) #end
-					                                            #if( $e.element().name() == "description" ) #set( $responseDescription = $e.value().value() ) #end
-					                                                #if( $e.element().name() == "message" ) #set( $responseMessage = $e.value().value() ) #end
-					                                    #end
-					                                    #set( $hasNoRows = false )
-					                                    <tr>
-					                                        <td>${responseCode}</td>
-					                                        <td colspan="2">
-					                                            #if ( ${responseDescription} )
-					                                                ${responseDescription}
-					                                            #else
-					                                                #if ( "200" == ${responseCode} )
-					                                                    Success
-					                                                #elseif ("201" == ${responseCode})
-					                                            		Created
-					                                   				#elseif ("204" == ${responseCode})
-					                                    				No content
-					                                                #elseif ( "400" == ${responseCode} )
-					                                                    The parameters provided are invalid
-					                                                #elseif ( "401" == ${responseCode} )
-					                                                    You are not authenticated
-					                                                #elseif ( "403" == ${responseCode} )
-					                                                    You are unauthorized for this action
-					                                                #elseif ( "404" == ${responseCode} )
-					                                                    Object not found
-					                                                #elseif ( "409" == ${responseCode} )
-					                                                    If doing a create, your request failed because this object already exists. If doing an update, your request failed because another user has modified this object since you last viewed it.
-					                                                #elseif ( "500" == ${responseCode} )
-					                                                    The server encountered an error
-					                                                #end
-					                                            #end
-					                                        </td>
-					                                    </tr>
-					                                #end
-					                            #end
-					                            #if( $element.element().name() == "codes" )
-					                                #set( $codes = $element.value().value() )
-					                                #foreach( $restCodes in $codes )
-					                                    #set( $responseMessage = "" )
-					                                    #foreach( $e in $restCodes.value().elementValues() )
-					                                        #if( $e.element().name() == "codes" ) 
-					                                          #set( $sortedResponseCodesAndDescriptions = $helper.sortString($e.value().value()))												
-					                                            #set( $responseCodesAndDescriptions = $sortedResponseCodesAndDescriptions.split(",") )  				
-					                                            #foreach ($responseCodeAndDescription in $responseCodesAndDescriptions)
-					                                                #set( $codeAndDescriptionArray = $responseCodeAndDescription.split("=") )		
-					                                                #set( $responseCode = $codeAndDescriptionArray.get(0).trim() )
-					                                                #if ($codeAndDescriptionArray.size() > 1)
-					                                                    #set( $responseDescription = $codeAndDescriptionArray.get(1) )
-					                                                #else
-					                                                    #set( $responseDescription = false )
-					                                                #end 
-					                                                <tr>
-					                                                    <td>${responseCode}</td>
-					                                                    <td colspan="2">
-					                                                        #if ( ${responseDescription} )
-					                                                            ${responseDescription}
-					                                                        #else
-					                                                            #if ( "200" == ${responseCode} )
-					                                                                Success
-					                                                            #elseif ("201" == ${responseCode})
-					                                                				Created
-					                                               				 #elseif ("204" == ${responseCode})
-					                                                				No content
-					                                                            #elseif ( "400" == ${responseCode} )
-					                                                                The parameters provided are invalid
-					                                                            #elseif ( "401" == ${responseCode} )
-					                                                                You are not authenticated
-					                                                            #elseif ( "403" == ${responseCode} )
-					                                                                You are unauthorized for this action
-					                                                            #elseif ( "404" == ${responseCode} )
-					                                                                Object not found
-					                                                            #elseif ( "409" == ${responseCode} )
-					                                                                If doing a create, your request failed because this object already exists. If doing an update, your request failed because another user has modified this object since you last viewed it.
-					                                                            #elseif ( "500" == ${responseCode} )
-					                                                                The server encountered an error
-					                                                            #end
-					                                                        #end
-					                                                    </td>
-					                                                </tr>
-					                                            #end 
-					                                        #end
-					                                    #end
-					                                    #set( $hasNoRows = false )
-					                                #end
-					                            #end
-					                        #end
-					                        #if( $hasNoRows )
-					                            <tr>
-					                                <td>-</td>
-					                                <td colspan="2">-</td>
-					                            </tr>
-					                        #end
-					                    </tbody>
-					                </table>
-					
-					                #if("org.springframework.http.ResponseEntity" == $method.returnType)
-					                	<p>
-						                    <b>Response Type</b>
-						                    : 
-						                    HTTP Response code only!
-						                </p>
-						                
-						                <h3>Response Example</h3>
-						                <p class="code">
-						                    HTTP Response code only!	
-						                </p>
-					                #else
-					                	<p>
-						                    <b>Response Type</b>
-						                    : 
-						                    #if( "java.lang.Object" == $method.returnType )
-						                        ${helper.renderType($encoder.escapeHtml($method.entityType))}
-						                    #else
-						                        ${helper.renderType($encoder.escapeHtml($method.returnType))}
-						                    #end
-						                </p>
-						                
-						                <p>
-						                    <b>Response data object</b>
-						                    : 
-						                    #if( $method.entityType )
-						                        ${helper.renderType($encoder.escapeHtml($method.entityType))}
-						                    #end
-						                </p>
-						                
-						                <h3>Response Example</h3>
-						                <p class="code">
-						                    <pre>${method.json}</pre> <!--<pre>${method.jsonEntity}</pre>-->	
-						                </p>
-						                
-					                #end
-							    </div>		#****End : API Path Hide****# 
+                            <li class="sublink" >
+                               #* <a href="api.html#${resource.classDoc.qualifiedName()}.${method.name}" class="link"> *#
+                                 
+
+                                
+                                <div class = "row"> 
+                                  	
+                                  	<div class = "col-md-5 col-sm-5 col-xs-5">
+                             			<span class="${method.method}">${method.method}</span>
+	                                  	<a class="link api-slide-toggle">
+	                                    #foreach( $rp in $resource.paths )
+	                                        #if( $velocityCount > 1),&nbsp;#end
+	                                            #foreach( $mp in $method.paths )
+	                                                #if( $velocityCount > 1),&nbsp;#end
+	                                                     #if($rp == "/" || $rp=="") /${mp} #set( $restPath = "/${mp}" ) #else /${rp}/${mp} #set( $restPath = "/${rp}/${mp}" ) #end <!--/${rp}/${mp}-->
+	                                            #end
+	                                    #end
+	                                    </a>
+	                                    
+                                  	</div>
+                                  	
+                                  	#*
+                                  	<div class = "col-md-4">  
+                                  		#foreach ( $trait in $method.traits )
+                                  			#set ($myArray = $trait.split(","))
+                                  			#foreach ($item in $myArray )
+                                        		<span class="trait">${item}</span>
+                                        	#end	
+                                    	#end
+                                    </div> 
+                                  	
+                                  	*#
+                                  	<div title = "${method.highlightApiMessage}" class = "col-md-7 col-sm-7 col-xs-7 " style="padding-right; font-size: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; ">
+                                  		#foreach ( $trait in $method.traits )
+                                  			#set ($myArray = $trait.split(","))
+                                  			#foreach ($item in $myArray )
+                                        		<span class="trait">${item}</span>
+                                        	#end	
+                                    	#end
+                                  		<span>${method.highlightApiMessage}</span> #*HighlightApiMessage*# 
+                                  	</div>
+                                  	
+                                  </div>
+                                  
+                                
+                                	
+                                	
+                                	
+                                <div class = "well api-path api-path-$methodST.get(0).toLowerCase()">
+                                    #set( $index = $index + 1 )
+                                    <p>
+                                        <b>Description</b>
+                                        :${method.methodDoc.commentText()}
+                                    </p>
+                                    #foreach( $since in $method.methodDoc.tags("@since") )
+                                        <p>
+                                            <b>Since</b>
+                                            :${since.text()}
+                                        </p>
+                                    #end
+                                    #if (${method.contentType} !="")
+                                    <p>
+                                     <b>Content-Type</b>: ${method.contentType}
+                                    </p>
+                                    #end
+                                    <h3 class = "description-toggle">Request parameters</h3>
+                                    <table id="restAPI_${index}">
+                                        <thead>
+                                            <th class="column1">Param Type</th>
+                                            <th class="column2">Name</th>
+                                            <th class="column3">Type</th>
+                                            <th class="column4">Required</th>
+                                            <th class="column5">Default Value</th>
+                                            <th class="columnAuto">Description</th>
+                                        </thead>
+                                        <tbody>
+                                            #set( $hasNoRows = true )
+                                            #foreach( $param in $method.pathVariables )
+                                                #set( $hasNoRows = false )
+                                                <tr>
+                                                    <td>path param</td>
+                                                    <td>${param.name}</td>
+                                                    <td>${param.type}</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>${param.comment}</td>
+                                                </tr>
+                                            #end
+                                            #foreach( $param in $method.parameters )
+                                                #set( $hasNoRows = false )
+                                                <tr>
+                                                    <td>query param</td>
+                                                    <td id="param_${index}_${param.name}">${param.name}</td>
+                                                    <td>${param.type}</td>
+                                                    <td style="text-align: center; padding: 0;">
+                                                        #if (${param.required})
+                                                            X
+                                                        #end
+                                                    </td>
+                                                    <td style="text-align: center; padding: 0;" id="value_param_${index}_${param.name}">
+                                                        #set( $defaultValue = ${param.defaultValue} )
+                                                        #set( $defaultValue = $defaultValue.replace('"','')) 
+                                                        $defaultValue
+                                                    </td>
+                                                    <td>${param.comment}</td>
+                                                </tr>
+                                                
+                                            #end
+                                            
+                                            #if( $method.isSupportsClassParams() )
+                                                #foreach( $tag in $resource.classDoc.tags("@param") )
+                                                    #set( $nameIndex = $tag.text().indexOf(" ") )
+                                                    #set( $typeIndex = $tag.text().lastIndexOf(" ") )
+                                                    <tr>
+                                                        <td>query (resource)</td>
+                                                        <td>${tag.text().substring(0, $nameIndex)}</td>
+                                                        <td>${tag.text().substring($typeIndex)}</td>
+                                                        <td></td>
+                                                        <td></td>
+                                                        <td>${tag.text().substring($nameIndex, $typeIndex)}</td>
+                                                    </tr>
+                                                #end
+                                            #end
+                                            #if( $method.body )
+                                                #set( $hasNoRows = false )
+                                                <tr>
+                                                    <td>body</td>
+                                                    <td>${method.body.name}</td>
+                                                    <td class = "sample-resource get-json-body" data-content-type = "${method.contentType}">${helper.renderType($method.body.type)}</td>
+                                                    <td style="text-align: center; padding: 0;"> 
+                                                        #if (${method.body.required})
+                                                            X
+                                                        #end</td>
+                                                    <td style="text-align: center; padding: 0;">
+                                                        #set( $defaultValue = ${method.body.defaultValue} )
+                                                        #set( $defaultValue = $defaultValue.replace('"','')) 
+                                                        $defaultValue
+                                                    </td>
+                                                    <td>${method.body.comment}</td>
+                                                </tr>
+                                            #end
+                                            #foreach( $param in $method.modelAttributes )
+                                                #set( $hasNoRows = false )
+                                                <tr>
+                                                    <td>body (properties separately)</td>
+                                                    <td>${param.name}</td>
+                                                    <td class = "sample-resource get-model-attribute" data-content-type = "${method.contentType}">${param.type}</td>
+                                                    <td></td>
+                                                    <td></td>
+                                                    <td>${param.comment}</td>
+                                                </tr>
+                                            #end
+                                            #if( $hasNoRows )
+                                                <tr>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                    <td>-</td>
+                                                </tr>
+                                            #end
+                                        </tbody>
+                                    </table>
+                                    <h3 class = "description-toggle">Response Codes</h3>
+                                    <table>
+                                        <thead>
+                                            <td class="column1">HTTP Response Code</td>
+                                            <td class="columnAuto">Description</td>
+                                        </thead>
+                                        <tbody>
+                                            #set( $hasNoRows = true )
+                                            #foreach( $element in $method.restReturn.elementValues() )
+                                                #if( $element.element().name() == "code" )
+                                                    #set( $code = $element.value().value() )
+                                                    #foreach( $restCode in $code )
+                                                        #set( $responseMessage = "" )
+                                                        #foreach( $e in $restCode.value().elementValues() )
+                                                            #if( $e.element().name() == "code" ) #set( $responseCode = $e.value().value() ) #end
+                                                                #if( $e.element().name() == "description" ) #set( $responseDescription = $e.value().value() ) #end
+                                                                    #if( $e.element().name() == "message" ) #set( $responseMessage = $e.value().value() ) #end
+                                                        #end
+                                                        #set( $hasNoRows = false )
+                                                        <tr>
+                                                            <td class='responseCode_${responseCode}'>${responseCode}</td>
+                                                            <td colspan="2">
+                                                                #if ( ${responseDescription} )
+                                                                    ${responseDescription}
+                                                                #else
+                                                                    #if ( "200" == ${responseCode} )
+                                                                        Success
+                                                                    #elseif ("201" == ${responseCode})
+                                                                        Created
+                                                                    #elseif ("204" == ${responseCode})
+                                                                        No content
+                                                                    #elseif ( "400" == ${responseCode} )
+                                                                        The parameters provided are invalid
+                                                                    #elseif ( "401" == ${responseCode} )
+                                                                        You are not authenticated
+                                                                    #elseif ( "403" == ${responseCode} )
+                                                                        You are unauthorized for this action
+                                                                    #elseif ( "404" == ${responseCode} )
+                                                                        Object not found
+                                                                    #elseif ( "409" == ${responseCode} )
+                                                                        If doing a create, your request failed because this object already exists. If doing an update, your request failed because another user has modified this object since you last viewed it.
+                                                                    #elseif ( "500" == ${responseCode} )
+                                                                        The server encountered an error
+                                                                    #end
+                                                                #end
+                                                            </td>
+                                                        </tr>
+                                                    #end
+                                                #end
+                                                #if( $element.element().name() == "codes" )
+                                                    #set( $codes = $element.value().value() )
+                                                    #foreach( $restCodes in $codes )
+                                                        #set( $responseMessage = "" )
+                                                        #foreach( $e in $restCodes.value().elementValues() )
+                                                            #if( $e.element().name() == "codes" ) 
+                                                              #set( $sortedResponseCodesAndDescriptions = $helper.sortString($e.value().value()))                                               
+                                                                #set( $responseCodesAndDescriptions = $sortedResponseCodesAndDescriptions.split(",") )                  
+                                                                #foreach ($responseCodeAndDescription in $responseCodesAndDescriptions)
+                                                                    #set( $codeAndDescriptionArray = $responseCodeAndDescription.split("=") )       
+                                                                    #set( $responseCode = $codeAndDescriptionArray.get(0).trim() )
+                                                                    #if ($codeAndDescriptionArray.size() > 1)
+                                                                        #set( $responseDescription = $codeAndDescriptionArray.get(1) )
+                                                                    #else
+                                                                        #set( $responseDescription = false )
+                                                                    #end 
+                                                                    <tr>
+                                                                        <td class='responseCode_${responseCode}'>${responseCode}</td>
+                                                                        <td colspan="2">
+                                                                            #if ( ${responseDescription} )
+                                                                                ${responseDescription}
+                                                                            #else
+                                                                                #if ( "200" == ${responseCode} )
+                                                                                    Success
+                                                                                #elseif ("201" == ${responseCode})
+                                                                                    Created
+                                                                                 #elseif ("204" == ${responseCode})
+                                                                                    No content
+                                                                                #elseif ( "400" == ${responseCode} )
+                                                                                    The parameters provided are invalid
+                                                                                #elseif ( "401" == ${responseCode} )
+                                                                                    You are not authenticated
+                                                                                #elseif ( "403" == ${responseCode} )
+                                                                                    You are unauthorized for this action
+                                                                                #elseif ( "404" == ${responseCode} )
+                                                                                    Object not found
+                                                                                #elseif ( "409" == ${responseCode} )
+                                                                                    If doing a create, your request failed because this object already exists. If doing an update, your request failed because another user has modified this object since you last viewed it.
+                                                                                #elseif ( "500" == ${responseCode} )
+                                                                                    The server encountered an error
+                                                                                #end
+                                                                            #end
+                                                                        </td>
+                                                                    </tr>
+                                                                #end 
+                                                            #end
+                                                        #end
+                                                        #set( $hasNoRows = false )
+                                                    #end
+                                                #end
+                                            #end
+                                            #if( $hasNoRows )
+                                                <tr>
+                                                    <td>-</td>
+                                                    <td colspan="2">-</td>
+                                                </tr>
+                                            #end
+                                        </tbody>
+                                    </table>
+                    
+                                    #if("org.springframework.http.ResponseEntity" == $method.returnType)
+                                        <p>
+                                            <b>Response Type</b>
+                                            : 
+                                            HTTP Response code only!
+                                        </p>
+                                        
+                                        <h3 class = "description-toggle">Response Example</h3>
+                                        <p class="code">
+                                            HTTP Response code only!    
+                                        </p>
+                                    #else
+                                        <p>
+                                            <b>Response Type</b>
+                                            : 
+                                            #if( "java.lang.Object" == $method.returnType )
+                                                ${helper.renderType($encoder.escapeHtml($method.entityType))}
+                                            #else
+                                                ${helper.renderType($encoder.escapeHtml($method.returnType))}
+                                            #end
+                                        </p>
+                                        
+                                        <p>
+                                            <b>Response data object</b>
+                                            : 
+                                            #if( $method.entityType )
+                                                ${helper.renderType($encoder.escapeHtml($method.entityType))}
+                                            #end
+                                        </p>
+                                        
+                                        <h3 class = "description-toggle">Response Example</h3>
+                                        <p class="code">
+                                            <pre>${method.json}</pre> <!--<pre>${method.jsonEntity}</pre>-->    
+                                        </p>
+                                        
+                                    #end
+                                     <!-- add TEST API tool here-->
+                                    <a class="api-toggle btn btn-info btn-xs" style="background-color:#0080FF" role="button" id = "${index}" data-request-method="${method.method}" data-path="${restPath}" data-table-index = "restAPI_${index}" data-content-type = "${method.contentType}">TEST API</a>
+                                   
+                                </div>      #****End : API Path Hide****# 
                             </li>
                         #end
                     </ul>
+                            
                 </li>
             #end
             <li>JSON Objects
                 <ul>
                     #foreach( $entry in $jsonClass.entrySet() )
-                        <li>
+                        <li class="jsonObject">
                             <a href="api.html#${entry.key}" class="link">${entry.key}</a>
                         </li>
                     #end
                 </ul>
             </li>
         </ul>
-        #set( $index = 0 )
-        #foreach( $resource in $resources )
-            <h1 class="resourceHeader">
-                #foreach( $rp in $resource.paths )
-                    <!-- Resource: /${rp} ---------------------------------------------------->
-                    #if( $velocityCount > 1),&nbsp;#end #if($rp == "/" || $rp=="") /#else /${rp}#end <!--/${rp}-->
-                #end
-                #foreach ( $trait in $resource.traits )
-                    <span class="trait2">${trait}</span>
-                #end
-            </h1>
-            <a name="${resource.classDoc.qualifiedName()}" ></a>
-            
-            <p class="concreteClass">
-                <b>Description</b>
-                : ${resource.classDoc.commentText()}
-            </p>
-            #foreach( $method in $resource.methods )
-                #set( $index = $index + 1 )
-                #set( $restPath = "" )
-                <!-- Method: ${method.name} ---------------------------------------------------->		
-                <a name="${resource.classDoc.qualifiedName()}.${method.name}" ></a>
-                <h2 class="methodHeader">
-                    <span>
-                        <b>REST path</b>
-                        :
-                        #foreach( $rp in $resource.paths )
-                            #if( $velocityCount > 1),&nbsp;#end
-                                #foreach( $mp in $method.paths )
-                                    #if( $velocityCount > 1),&nbsp;#end
-                                        #if($rp == "/" || $rp=="") 
-                                        	/${mp}
-                                        	#set( $restPath = "/${mp}" ) 
-                                        #else 
-                                        	/${rp}/${mp}
-                                        	#set( $restPath = "/${rp}/${mp}" )
-                                     	#end <!--/${rp}/${mp} -->
-                                #end
-                        #end
-                        <!--&nbsp;--> <span class="${method.method}">${method.method}</span>
-                        #foreach ( $trait in $method.traits )
-                            <span class="trait">${trait}</span>
-                        #end
-                    </span>
-                <b style='color: red;font-size:small'>${method.highlightApiMessage}</b>
-                </h2>
-                <p>
-                    <b>Description</b>
-                    :${method.methodDoc.commentText()}
-                </p>
-                #foreach( $since in $method.methodDoc.tags("@since") )
-                    <p>
-                        <b>Since</b>
-                        :${since.text()}
-                    </p>
-                #end
-                #if (${method.contentType} !="")
-                <p>
-                 <b>Content-Type</b>: ${method.contentType}
-                </p>
-                #end
-                
-                <!-- add TEST API tool here-->
-                <a class="api-toggle btn btn-info btn-xs" role="button" id = "${index}" data-request-method="${method.method}" data-path="${restPath}" data-table-index = "restAPI_${index}">TEST API</a>
-                
-                <h3>Request parameters</h3>
-                <table id="restAPI_${index}">
-                    <thead>
-                        <th class="column1">Param Type</th>
-                        <th class="column2">Name</th>
-                        <th class="column3">Type</th>
-                        <th class="column4">Required</th>
-                        <th class="column5">Default Value</th>
-                        <th class="columnAuto">Description</th>
-                    </thead>
-                    <tbody>
-                        #set( $hasNoRows = true )
-                        #foreach( $param in $method.pathVariables )
-                            #set( $hasNoRows = false )
-                            <tr>
-                                <td>path param</td>
-                                <td>${param.name}</td>
-                                <td>${param.type}</td>
-                                <td></td>
-                                <td></td>
-                                <td>${param.comment}</td>
-                            </tr>
-                        #end
-                        #foreach( $param in $method.parameters )
-                            #set( $hasNoRows = false )
-                            <tr>
-                                <td>query param</td>
-                                <td id="param_${index}_${param.name}">${param.name}</td>
-                                <td>${param.type}</td>
-                                <td style="text-align: center; padding: 0;">
-                                    #if (${param.required})
-                                        X
-                                    #end
-                                </td>
-                                <td style="text-align: center; padding: 0;" id="value_param_${index}_${param.name}">
-                                    #set( $defaultValue = ${param.defaultValue} )
-                                    #set( $defaultValue = $defaultValue.replace('"','')) 
-                                    $defaultValue
-                                </td>
-                                <td>${param.comment}</td>
-                            </tr>
-                            
-                        #end
-                        
-                        #if( $method.isSupportsClassParams() )
-                            #foreach( $tag in $resource.classDoc.tags("@param") )
-                                #set( $nameIndex = $tag.text().indexOf(" ") )
-                                #set( $typeIndex = $tag.text().lastIndexOf(" ") )
-                                <tr>
-                                    <td>query (resource)</td>
-                                    <td>${tag.text().substring(0, $nameIndex)}</td>
-                                    <td>${tag.text().substring($typeIndex)}</td>
-                                    <td></td>
-                                    <td></td>
-                                    <td>${tag.text().substring($nameIndex, $typeIndex)}</td>
-                                </tr>
-                            #end
-                        #end
-                        #if( $method.body )
-                            #set( $hasNoRows = false )
-                            <tr>
-                                <td>body</td>
-                                <td>${method.body.name}</td>
-                                <td>${helper.renderType($method.body.type)}</td>
-                                <td style="text-align: center; padding: 0;"> 
-                                	#if (${method.body.required})
-                                        X
-                                    #end</td>
-                                <td style="text-align: center; padding: 0;">
-                                	#set( $defaultValue = ${method.body.defaultValue} )
-                                    #set( $defaultValue = $defaultValue.replace('"','')) 
-                                    $defaultValue
-                                </td>
-                                <td>${method.body.comment}</td>
-                            </tr>
-                        #end
-                        #foreach( $param in $method.modelAttributes )
-                            #set( $hasNoRows = false )
-                            <tr>
-                                <td>body (properties separately)</td>
-                                <td>${param.name}</td>
-                                <td>${param.type}</td>
-                                <td></td>
-                                <td></td>
-                                <td>${param.comment}</td>
-                            </tr>
-                        #end
-                        #if( $hasNoRows )
-                            <tr>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                                <td>-</td>
-                            </tr>
-                        #end
-                    </tbody>
-                </table>
-                <h3>Response Codes</h3>
-                <table>
-                    <thead>
-                        <td class="column1">HTTP Response Code</td>
-                        <td class="columnAuto">Description</td>
-                    </thead>
-                    <tbody>
-                        #set( $hasNoRows = true )
-                        #foreach( $element in $method.restReturn.elementValues() )
-                            #if( $element.element().name() == "code" )
-                                #set( $code = $element.value().value() )
-                                #foreach( $restCode in $code )
-                                    #set( $responseMessage = "" )
-                                    #foreach( $e in $restCode.value().elementValues() )
-                                        #if( $e.element().name() == "code" ) #set( $responseCode = $e.value().value() ) #end
-                                            #if( $e.element().name() == "description" ) #set( $responseDescription = $e.value().value() ) #end
-                                                #if( $e.element().name() == "message" ) #set( $responseMessage = $e.value().value() ) #end
-                                    #end
-                                    #set( $hasNoRows = false )
-                                    <tr>
-                                        <td>${responseCode}</td>
-                                        <td colspan="2">
-                                            #if ( ${responseDescription} )
-                                                ${responseDescription}
-                                            #else
-                                                #if ( "200" == ${responseCode} )
-                                                    Success
-                                                #elseif ("201" == ${responseCode})
-                                            		Created
-                                   				#elseif ("204" == ${responseCode})
-                                    				No content
-                                                #elseif ( "400" == ${responseCode} )
-                                                    The parameters provided are invalid
-                                                #elseif ( "401" == ${responseCode} )
-                                                    You are not authenticated
-                                                #elseif ( "403" == ${responseCode} )
-                                                    You are unauthorized for this action
-                                                #elseif ( "404" == ${responseCode} )
-                                                    Object not found
-                                                #elseif ( "409" == ${responseCode} )
-                                                    If doing a create, your request failed because this object already exists. If doing an update, your request failed because another user has modified this object since you last viewed it.
-                                                #elseif ( "500" == ${responseCode} )
-                                                    The server encountered an error
-                                                #end
-                                            #end
-                                        </td>
-                                    </tr>
-                                #end
-                            #end
-                            #if( $element.element().name() == "codes" )
-                                #set( $codes = $element.value().value() )
-                                #foreach( $restCodes in $codes )
-                                    #set( $responseMessage = "" )
-                                    #foreach( $e in $restCodes.value().elementValues() )
-                                        #if( $e.element().name() == "codes" ) 
-                                          #set( $sortedResponseCodesAndDescriptions = $helper.sortString($e.value().value()))												
-                                            #set( $responseCodesAndDescriptions = $sortedResponseCodesAndDescriptions.split(",") )  				
-                                            #foreach ($responseCodeAndDescription in $responseCodesAndDescriptions)
-                                                #set( $codeAndDescriptionArray = $responseCodeAndDescription.split("=") )		
-                                                #set( $responseCode = $codeAndDescriptionArray.get(0).trim() )
-                                                #if ($codeAndDescriptionArray.size() > 1)
-                                                    #set( $responseDescription = $codeAndDescriptionArray.get(1) )
-                                                #else
-                                                    #set( $responseDescription = false )
-                                                #end 
-                                                <tr>
-                                                    <td>${responseCode}</td>
-                                                    <td colspan="2">
-                                                        #if ( ${responseDescription} )
-                                                            ${responseDescription}
-                                                        #else
-                                                            #if ( "200" == ${responseCode} )
-                                                                Success
-                                                            #elseif ("201" == ${responseCode})
-                                                				Created
-                                               				 #elseif ("204" == ${responseCode})
-                                                				No content
-                                                            #elseif ( "400" == ${responseCode} )
-                                                                The parameters provided are invalid
-                                                            #elseif ( "401" == ${responseCode} )
-                                                                You are not authenticated
-                                                            #elseif ( "403" == ${responseCode} )
-                                                                You are unauthorized for this action
-                                                            #elseif ( "404" == ${responseCode} )
-                                                                Object not found
-                                                            #elseif ( "409" == ${responseCode} )
-                                                                If doing a create, your request failed because this object already exists. If doing an update, your request failed because another user has modified this object since you last viewed it.
-                                                            #elseif ( "500" == ${responseCode} )
-                                                                The server encountered an error
-                                                            #end
-                                                        #end
-                                                    </td>
-                                                </tr>
-                                            #end 
-                                        #end
-                                    #end
-                                    #set( $hasNoRows = false )
-                                #end
-                            #end
-                        #end
-                        #if( $hasNoRows )
-                            <tr>
-                                <td>-</td>
-                                <td colspan="2">-</td>
-                            </tr>
-                        #end
-                    </tbody>
-                </table>
-
-                #if("org.springframework.http.ResponseEntity" == $method.returnType)
-                	<p>
-	                    <b>Response Type</b>
-	                    : 
-	                    HTTP Response code only!
-	                </p>
-	                
-	                <h3>Response Example</h3>
-	                <p class="code">
-	                    HTTP Response code only!	
-	                </p>
-                #else
-                	<p>
-	                    <b>Response Type</b>
-	                    : 
-	                    #if( "java.lang.Object" == $method.returnType )
-	                        ${helper.renderType($encoder.escapeHtml($method.entityType))}
-	                    #else
-	                        ${helper.renderType($encoder.escapeHtml($method.returnType))}
-	                    #end
-	                </p>
-	                
-	                <p>
-	                    <b>Response data object</b>
-	                    : 
-	                    #if( $method.entityType )
-	                        ${helper.renderType($encoder.escapeHtml($method.entityType))}
-	                    #end
-	                </p>
-	                
-	                <h3>Response Example</h3>
-	                <p class="code">
-	                    <pre>${method.json}</pre> <!--<pre>${method.jsonEntity}</pre>-->	
-	                </p>
-	                
-                #end
-           
-            #end
-        #end
+        
         <h1 class="resourceHeader">JSON Objects</h1>
         #foreach( $entry in $jsonDoc.entrySet() )
-            <!-- JSON object: ${entry.key} ---------------------------------------------------->		
+            <!-- JSON object: ${entry.key} ---------------------------------------------------->        
             <a name="${entry.key}" ></a>
             <h2 class="methodHeader">${entry.key}</h2>
             <table>
@@ -693,21 +399,21 @@
                     #set($parentMethods = $helper.getParentMethods($jd))
                     #foreach( $m in $parentMethods )
                         
-                    	#set( $memberName = $helper.getMemberName($m.name()) )
-                      	#set( $memberType = $m.returnType().qualifiedTypeName() )
-                      	#if(!$helper.isJsonIgnoreFiled($memberName))
-                      	    $!myMap.put("${memberName}","${memberName}")
-                            	<tr>
-                            		<td>
-                            			${memberName}
-                            		</td>
-                            		<td>${helper.renderTypeWithDetailObject($memberType, $className,$m)}</td>
-                            		<td>
-                            			${helper.getFieldComment($jd,$memberName)}
-                            		</td>
-                            	</tr>
+                        #set( $memberName = $helper.getMemberName($m.name()) )
+                        #set( $memberType = $m.returnType().qualifiedTypeName() )
+                        #if(!$helper.isJsonIgnoreFiled($memberName))
+                            $!myMap.put("${memberName}","${memberName}")
+                                <tr>
+                                    <td>
+                                        ${memberName}
+                                    </td>
+                                    <td>${helper.renderTypeWithDetailObject($memberType, $className,$m)}</td>
+                                    <td>
+                                        ${helper.getFieldComment($jd,$memberName)}
+                                    </td>
+                                </tr>
                         
-                     	#end
+                        #end
                     #end
                     #foreach( $m in $jd.methods(false) )
                         #if( $helper.isGetter($m.name()) )
@@ -715,19 +421,19 @@
                             #set( $memberType = $m.returnType().qualifiedTypeName() )
                             #if(!$helper.isJsonIgnoreFiled($jd.qualifiedName(),$memberName))
                                   #if(!$myMap.get("${memberName}"))
-    	                            <tr>
-    	                                <td>${memberName} </td>
-    	                                
-    	                                <td>${helper.renderTypeWithDetailObject($memberType, $className,$m)}</td>
-    	                                <td>
-    	                                    #foreach( $f in $jd.fields(false) )
-    	                                        #if( $f.name() == $memberName )
-    	                                            ${f.commentText()}
-    	                                        #end
-    	                                    #end
-    	                                </td>
-    	                            </tr>
-    	                          #end
+                                    <tr>
+                                        <td>${memberName} </td>
+                                        
+                                        <td>${helper.renderTypeWithDetailObject($memberType, $className,$m)}</td>
+                                        <td>
+                                            #foreach( $f in $jd.fields(false) )
+                                                #if( $f.name() == $memberName )
+                                                    ${f.commentText()}
+                                                #end
+                                            #end
+                                        </td>
+                                    </tr>
+                                  #end
                             #end
                         #end
                     #end
@@ -794,5 +500,6 @@
                 </tbody>
             </table>
         #end
+        </div>
     </body>
 </html>

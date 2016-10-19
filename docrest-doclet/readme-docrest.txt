@@ -18,7 +18,7 @@ Monitor REST-API GET: http://localhost:8080/monitor
 </pre>
 <!-- server URLs -->
 <script type="text/javascript">
-    var serverUrls =["https://abc.com","https://test.appspot.com"];
+    var serverUrls =["https://thecollection-test.appspot.com","https://test.appspot.com"];
     var isEnableUserSecurity = true ;
     //alert(serverUrls);
 </script>

@@ -24,8 +24,10 @@
         "type" : "integer", "format" : "int64",
     #elseif($type == "java.lang.double" || $type == "double")
         "type" : "number", "format" : "double",
+    #elseif($type == "java.lang.float" || $type == "float")
+        "type" : "number", "format" : "float",  
     #elseif($type == "java.lang.boolean" || $type == "boolean")
-        "type" : "boolean",
+        "type" : "boolean",  
     #elseif($type == "java.lang.string" || $type == "string")
         "type" : "string",
     #elseif($type == "java.util.collection" || $type == "java.util.list")
@@ -46,6 +48,8 @@
         "$name":{"type":"integer", "format" : "int32"}
     #elseif($type.toLowerCase() == "java.lang.long" || $type.toLowerCase() == "long")
         "$name":{"type" : "integer", "format" : "int64"}
+    #elseif($type.toLowerCase() == "java.lang.float" || $type.toLowerCase() == "float")
+        "$name":{"type" : "number", "format" : "float"}    
     #elseif($type.toLowerCase() == "java.lang.double" || $type.toLowerCase() == "double")
         "$name":{"type" : "number", "format" : "double"}
     #elseif($type.toLowerCase() == "java.lang.boolean" || $type.toLowerCase() == "boolean")
@@ -64,6 +68,8 @@
                         "type":"integer", "format" : "int32"
                     #elseif($arrType.toLowerCase() == "java.lang.long" || $arrType.toLowerCase() == "long")
                         "type" : "integer", "format" : "int64"
+                    #elseif($arrType.toLowerCase() == "java.lang.float" || $arrType.toLowerCase() == "float")
+                        "type" : "number", "format" : "float"    
                     #elseif($arrType.toLowerCase() == "java.lang.double" || $arrType.toLowerCase() == "double")
                         "type" : "number", "format" : "double"
                     #elseif($arrType.toLowerCase() == "java.lang.boolean" || $arrType.toLowerCase() == "boolean")
@@ -133,6 +139,8 @@
                         "type":"integer", "format" : "int32"
                     #elseif($entityType.toLowerCase() == "java.lang.long" || $entityType.toLowerCase() == "long")
                         "type" : "integer", "format" : "int64"
+                    #elseif($entityType.toLowerCase() == "java.lang.float" || $entityType.toLowerCase() == "float")
+                        "type" : "number", "format" : "float"
                     #elseif ($entityType.toLowerCase() == "java.util.date" || $entityType.toLowerCase() == "date")
                         "type" : "string", "format" : "date"
                     #elseif($entityType.toLowerCase() == "java.lang.double" || $entityType.toLowerCase() == "double")
@@ -156,6 +164,8 @@
                     "type":"integer", "format" : "int32"
                 #elseif($entityType.toLowerCase() == "java.lang.long" || $entityType.toLowerCase() == "long")
                     "type" : "integer", "format" : "int64"
+                #elseif($entityType.toLowerCase() == "java.lang.float" || $entityType.toLowerCase() == "float")
+                    "type" : "number", "format" : "float"
                 #elseif ($entityType.toLowerCase() == "java.util.date" || $entityType.toLowerCase() == "date")
                     "type" : "string", "format" : "date"
                 #elseif($entityType.toLowerCase() == "java.lang.double" || $entityType.toLowerCase() == "double")
@@ -178,7 +188,8 @@
 "info": {
     "title": "Rest API",
     "version": "0.0.1",
-    "description": "This is a sample Rest API.",
+    ##"description": "This is a sample Rest API.",
+    "description":"${description}",
     "termsOfService": "http://swagger.io/terms/",
     "contact":{
         "name" : "API Support",
@@ -191,10 +202,11 @@
         "url" : "https://opensource.org/licenses/MIT"
     }
 },
-"host": "example.com",
+"host": "${baseUrl}",
 ## "basePath": "${baseUrl}",
 "basePath": "/api",
-"schemes": [ "http", "https" ],
+##"schemes": [ "http", "https" ],
+"schemes": [ "https" ],
 "consumes": [ "application/json" ],
 "produces": [ "application/json" ],
 "paths": {
@@ -209,15 +221,20 @@
                            
                                 #if($init == true ) 
                                     #set($compare_path =  "/${rp}/${mp}")
-                                    "/${rp}/${mp}" : {
+                                    ##"/${rp}/${mp}" : {
+                                    "$compare_path.trim().replaceAll("//","/")" : {
                                         "${method.method.toLowerCase()}" : {
-                                        #set ( $commentText = $method.methodDoc.commentText().trim().replaceAll("\n","").replaceAll("\r",""))
+                                        #set ( $commentText = $method.methodDoc.commentText().trim().replaceAll("\n","").replaceAll("\r","").replaceAll('\"','\\\"') )
                                         ##"description": "${resource.classDoc.qualifiedName()}",
                                         "description": "${commentText}",
                                         "operationId": "${method.name}$unique_identify",
                                         ##"summary":"${commentText}",
-                                        "summary" : "${method.highlightApiMessage}",
-                                        
+                                         #if($method.traits.size() != 0 ) 
+                                         "summary" : "${method.traits} ${method.highlightApiMessage}",
+                                         #else
+                                         "summary" : "${method.highlightApiMessage}",
+                                         #end
+                                         
                                         "parameters":[
                                         #set( $foo = "" )
                                         #set( $IsHasParam = false )
@@ -229,7 +246,7 @@
                                                 "in": "path",
                                                 
                                                 #convertType(${param.type.toLowerCase()})
-                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r",""))
+                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r","").replaceAll('\"','\\\"') )
                                                 "description":"${paramComment}",
                                                 
                                                 "required": true
@@ -247,7 +264,7 @@
                                                 "in" : "query",
                                                 
                                                 #convertType(${param.type.toLowerCase()})
-                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r",""))
+                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r","").replaceAll('\"','\\\"') )
                                                 "description":"${paramComment}",
                                                 
                                                 "required":false
@@ -374,10 +391,14 @@
                             
                                 #if( $compare_path == "/${rp}/${mp}" && $init == false ) , 
                                     "${method.method.toLowerCase()}" : {
-                                        #set ( $commentText = $method.methodDoc.commentText().trim().replaceAll("\n","").replaceAll("\r",""))
+                                        #set ( $commentText = $method.methodDoc.commentText().trim().replaceAll("\n","").replaceAll("\r","").replaceAll('\"','\\\"') )
                                         "description": "${commentText}",
                                         "operationId": "${method.name}$unique_identify",
-                                        "summary" : "${method.highlightApiMessage}",
+                                       	 #if($method.traits.size() != 0 ) 
+                                         "summary" : "${method.traits} ${method.highlightApiMessage}",
+                                         #else
+                                         "summary" : "${method.highlightApiMessage}",
+                                         #end
                                    
                                         "parameters":[
                                         #set( $foo = "" )
@@ -390,7 +411,7 @@
                                                 "in": "path",
                                                 
                                                 #convertType(${param.type.toLowerCase()})
-                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r",""))
+                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r","").replaceAll('\"','\\\"') )
                                                 "description":"${paramComment}",
                                                 
                                                 "required": true
@@ -407,7 +428,7 @@
                                                 "in" : "query",
                                                 
                                                 #convertType(${param.type.toLowerCase()})
-                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r",""))
+                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r","").replaceAll('\"','\\\"') )
                                                 "description":"${paramComment}",
                                                 
                                                 "required":false
@@ -533,12 +554,17 @@
                                 #elseif ( $compare_path != "/${rp}/${mp}")
                                      #set($compare_path =  "/${rp}/${mp}")
                                      },
-                                     "/${rp}/${mp}" : {
+                                     ##"/${rp}/${mp}" : {
+                                     "$compare_path.trim().replaceAll("//","/")" : {
                                         "${method.method.toLowerCase()}" : {
-                                        #set ( $commentText = $method.methodDoc.commentText().trim().replaceAll("\n","").replaceAll("\r",""))
+                                        #set ( $commentText = $method.methodDoc.commentText().trim().replaceAll("\n","").replaceAll("\r","").replaceAll('\"','\\\"') )
                                         "description": "${commentText}",
                                         "operationId": "${method.name}$unique_identify",
-                                        "summary" : "${method.highlightApiMessage}",
+                                         #if($method.traits.size() != 0 ) 
+                                         "summary" : "${method.traits} ${method.highlightApiMessage}",
+                                         #else
+                                         "summary" : "${method.highlightApiMessage}",
+                                         #end
                                         
                                         "parameters":[
                                         #set( $foo = "" )
@@ -551,7 +577,7 @@
                                                 "in": "path",
                                                 
                                                 #convertType(${param.type.toLowerCase()})
-                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r",""))
+                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r","").replaceAll('\"','\\\"') )
                                                 "description":"${paramComment}",
                                                 "required": true
                                                 }
@@ -567,7 +593,7 @@
                                                 "in" : "query",
                                                 
                                                 #convertType(${param.type.toLowerCase()})
-                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r",""))
+                                                #set ($paramComment= $param.comment.trim().replaceAll("\n","").replaceAll("\r","").replaceAll('\"','\\\"') )
                                                 "description":"${paramComment}",
                                                 "required":false
                                                 
