@@ -630,6 +630,28 @@ public class DocRestDoclet {
         return result;
     }
 
+  //use by template velocity template
+    public static boolean isJsonIgnoreFiledsWithParentClass(String entityName, String property) {
+        try {
+            
+            Class c = Class.forName(entityName);
+            Set<String> ignoredProperties = getClassIgnoreProperties(c);
+            if (ignoredProperties.contains(property)) {
+                return true;
+            }
+            //
+            Field fields[] = c.getSuperclass().getDeclaredFields();
+            for (Field field : fields) {
+                if (field.getName().equals(property) && isJsonIgnoreFiled(field)) {
+                    return true;
+                }
+            }
+        } catch (ClassNotFoundException exc) {
+            // Do nothing
+        }
+        return false;
+    }
+    
     public static boolean isJsonIgnoreFiled(String entityName, String property) {
         try {
             Class c = Class.forName(entityName);
@@ -1106,9 +1128,8 @@ public class DocRestDoclet {
             public int compare(Resource o1, Resource o2) {
                 // return
                 // o1.getEntityType().compareToIgnoreCase(o2.getEntityType());
-                return o1.getName().compareToIgnoreCase(o2.getName());
-                // return
-                // o1.getPaths()[0].compareToIgnoreCase(o2.getPaths()[0]);
+              //return o1.getName().compareToIgnoreCase(o2.getName()); // compare with controller name
+                return o1.getPaths()[0].compareToIgnoreCase(o2.getPaths()[0]); // compare path 
             }
         });
 

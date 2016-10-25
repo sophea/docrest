@@ -401,7 +401,7 @@
                         
                         #set( $memberName = $helper.getMemberName($m.name()) )
                         #set( $memberType = $m.returnType().qualifiedTypeName() )
-                        #if(!$helper.isJsonIgnoreFiled($memberName))
+                        #if(!$helper.isJsonIgnoreFiledsWithParentClass($jd.qualifiedName(),$memberName))
                             $!myMap.put("${memberName}","${memberName}")
                                 <tr>
                                     <td>
