@@ -17,7 +17,7 @@ To use DocRest in a project please make the following changes to pom.xml:
        <dependency>
             <groupId>com.wadpam</groupId>
             <artifactId>docrest-api</artifactId>
-            <version>1.31</version>
+            <version>1.37</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -108,7 +108,10 @@ How to use rest-doclet annotation
  
  Tip
  =====
- - @RequestParam(required=false) - Please add 'required' to every RequestParam. It produces better DocRest. Value should be true or false.
- 
+ - @RequestParam(required=false) - Please add 'required' to every RequestParam. It produces better DocRest. Value should be true or false. 
  - Optional readme-docrest.txt file directly under project directory will be used as top guideline of REST API
        
+
+====Release new version and deploy===
+>>mvn release:clean release:prepare
+>>mvn deploy
