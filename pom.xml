@@ -25,6 +25,16 @@
             </plugin>
             
 	<plugin>
+      <artifactId>maven-release-plugin</artifactId>
+      <version>2.4.1</version>
+      <configuration>
+        <useReleaseProfile>false</useReleaseProfile>
+        <releaseProfiles>release</releaseProfiles>
+        <autoVersionSubmodules>true</autoVersionSubmodules>
+      </configuration>
+    </plugin>
+
+	<plugin>
 	   <artifactId>maven-deploy-plugin</artifactId>
 	   <version>2.8.1</version>
 	   <executions>
@@ -113,6 +123,8 @@
     <scm>
         <url>https://github.com/sophea/docrest</url>
         <developerConnection>scm:git:ssh://git@github.com/sophea/docrest.git</developerConnection>
+	<connection>scm:git:https://github.com/sophea/docrest.git</connection>
+
       <tag>HEAD</tag>
   </scm>
     
