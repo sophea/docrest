@@ -70,13 +70,13 @@
                 <id>bintray-sopheamak-maven_repo</id>
                 <name>sopheamak-open_repo</name>
                 <url>https://api.bintray.com/maven/sopheamak/maven_repo/docrest;publish=1</url>
-        </repository>
 	<releases>
 	      <enabled>true</enabled>
 	    </releases>
 	    <snapshots>
 	      <enabled>false</enabled>
 	    </snapshots>
+        </repository>
     </distributionManagement>
 
     <licenses>
