@@ -65,19 +65,13 @@
     </build>
 
     <distributionManagement>
-        
+	<!--        
         <repository>
                 <id>bintray-sopheamak-maven_repo</id>
                 <name>sopheamak-open_repo</name>
                 <url>https://api.bintray.com/maven/sopheamak/maven_repo/docrest;publish=1</url>
-	<releases>
-	      <enabled>true</enabled>
-	    </releases>
-	    <snapshots>
-	      <enabled>false</enabled>
-	    </snapshots>
         </repository>
-
+-->
         <repository>
             <id>sophea-github-releases</id>
             <name>sophea GitHub releases repo</name>
