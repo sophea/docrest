@@ -75,12 +75,12 @@
         <repository>
             <id>sophea-github-releases</id>
             <name>sophea GitHub releases repo</name>
-            <url>file:../mvn-repo/releases</url>
+            <url>file:../maven-repo/releases</url>
         </repository>
         <snapshotRepository>
             <id>sophea-github-snapshots</id>
             <name>sophea GitHub snapshots repo</name>
-            <url>file:../mvn-repo/snapshots</url>
+            <url>file:../maven-repo/snapshots</url>
         </snapshotRepository>
 
     </distributionManagement>
