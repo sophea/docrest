@@ -7,7 +7,7 @@
  * function support
  */
 function Helper() {
-	
+	 this.hash = "";
      this.formUrlEncoded = "application/x-www-form-urlencoded; charset=utf-8";
      this.applicationJson = "application/json; charset=utf-8";
      this.accessToken = "?access_token=";
@@ -919,6 +919,7 @@ $(window).load(function () {
      $(document).on ("click",".api-slide-toggle",function () {
     	 //$(this).next().next().slideToggle();
     	 $(this).closest(".row").next().slideToggle();
+    	 
      });
      
 
@@ -927,9 +928,27 @@ $(window).load(function () {
       * Description : toggle api-parent
       */
      $(document).on ("click",".api-slide-toggle_one_level",function () {
-    	 $(this).next().slideToggle();
+    	 //$(this).next().slideToggle();
+    	 if ( $(this).data('goto') == false) {
+    		 $(this).data('goto', true);
+    	 }else {
+    		 $(this).next().slideToggle();
+    	 } 
      });
-
+     
+     /**
+      * window scroll event
+      */
+     $(window).scroll(function(event){
+    	 if ( helper.hash == window.location.hash.substr(1)) {
+    		 $("a[data-goto]").data('goto', false);
+    	 } else {
+    		 helper.hash = window.location.hash.substr(1);
+    		 $("a[id = '"+helper.hash+"']").data('goto',true);
+        	 $("a[id != '"+helper.hash+"']").data('goto',false);
+    	 }
+     }); 
+     
      /**
       * Event : click 
       * Description : toggle next object

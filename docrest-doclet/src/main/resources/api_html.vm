@@ -44,8 +44,8 @@
                 
                     #foreach( $rp in $resource.paths )
                        
-                        #if( $velocityCount > 1),&nbsp;#end <a class="link api-slide-toggle_one_level"> #if($rp == "/" || $rp=="") /#else /${rp}#end <!--/${rp}--></a>
-                        
+                        #if( $velocityCount > 1),&nbsp;#end <a href ="#${rp}" data-goto = "false" class="link api-slide-toggle_one_level" id = "${rp}"> #if($rp == "/" || $rp=="") /#else /${rp}#end <!--/${rp}--></a>
+                         
                     #end
                     <ul class="restAPIs"> #* main group {domain} *#
                         #foreach( $method in $resource.methods )
