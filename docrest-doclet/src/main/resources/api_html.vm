@@ -43,9 +43,7 @@
                   #set( $i = $i +1 )
                 
                     #foreach( $rp in $resource.paths )
-                       
                         #if( $velocityCount > 1),&nbsp;#end <a href ="#${rp}" data-goto = "false" class="link api-slide-toggle_one_level" id = "${rp}"> #if($rp == "/" || $rp=="") /#else /${rp}#end <!--/${rp}--></a>
-                         
                     #end
                     <ul class="restAPIs"> #* main group {domain} *#
                         #foreach( $method in $resource.methods )
@@ -402,10 +400,10 @@
                         #set( $memberName = $helper.getMemberName($m.name()) )
                         #set( $memberType = $m.returnType().qualifiedTypeName() )
                         #if(!$helper.isJsonIgnoreFiledsWithParentClass($jd.qualifiedName(),$memberName))
-                            $!myMap.put("${memberName}","${memberName}")
+                                $!myMap.put("${memberName}","${memberName}")
                                 <tr>
                                     <td>
-                                        ${memberName}
+                                       ${memberName}
                                     </td>
                                     <td>${helper.renderTypeWithDetailObject($memberType, $className,$m)}</td>
                                     <td>

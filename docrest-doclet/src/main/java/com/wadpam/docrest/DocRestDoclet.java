@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -588,7 +589,7 @@ public class DocRestDoclet {
             // Check whether this annotation is JsonIgnore of jackson from
             // codehaus or fasterxml
             if ("JsonIgnore".equals(annotation.annotationType().getSimpleName())
-                    && annotation.annotationType().getPackage().getName().contains("jackson")) {
+                    | annotation.annotationType().getPackage().getName().contains("jackson")) {
                 isJsonIgnore = true;
                 break;
             }
@@ -1123,15 +1124,7 @@ public class DocRestDoclet {
             classDocs.put(classDoc.qualifiedName(), classDoc);
         }
 
-        final Collection<Resource> resources = new TreeSet<Resource>(new Comparator<Resource>() {
-            @Override
-            public int compare(Resource o1, Resource o2) {
-                // return
-                // o1.getEntityType().compareToIgnoreCase(o2.getEntityType());
-              //return o1.getName().compareToIgnoreCase(o2.getName()); // compare with controller name
-                return o1.getPaths()[0].compareToIgnoreCase(o2.getPaths()[0]); // compare path 
-            }
-        });
+        final List<Resource> resources = new ArrayList<>();
 
         // pre-filter @Controllers
         AnnotationTypeDoc type;
@@ -1270,7 +1263,18 @@ public class DocRestDoclet {
                 }
             }
         }
-
+        //sort resources
+        Collections.sort(resources, new Comparator<Resource>() {
+            @Override
+            public int compare(Resource o1, Resource o2) {
+                // return
+                // o1.getEntityType().compareToIgnoreCase(o2.getEntityType());
+             // return o1.getName().compareToIgnoreCase(o2.getName()); // compare with controller name
+                return o1.getPaths()[0].compareToIgnoreCase(o2.getPaths()[0]); // compare path 
+                
+            }
+        });
+        
         return resources;
     }
 

@@ -18,8 +18,8 @@ import com.sun.javadoc.ClassDoc;
  *
  * @author os
  */
-public class Resource {
-private String[] paths;
+public class Resource implements Trait {
+    private String[] paths;
     
     private String entityType;
     
