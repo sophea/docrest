@@ -322,7 +322,8 @@
                                         </tbody>
                                     </table>
                     
-                                    #if("org.springframework.http.ResponseEntity" == $method.returnType)
+                                    #if("org.springframework.http.ResponseEntity" == $method.returnType || "java.lang.Void" == $method.returnType
+                                    || "java.lang.Object.class" == $method.returnType)
                                         <p>
                                             <b>Response Type</b>
                                             : 
@@ -347,7 +348,9 @@
                                         <p>
                                             <b>Response data object</b>
                                             : 
-                                            #if( $method.entityType )
+                                            #if( "java.lang.Object.class" == $method.entityType )
+                                                ${helper.renderType($encoder.escapeHtml($method.returnType))}
+                                            #else
                                                 ${helper.renderType($encoder.escapeHtml($method.entityType))}
                                             #end
                                         </p>
