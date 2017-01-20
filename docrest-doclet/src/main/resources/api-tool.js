@@ -922,7 +922,14 @@ $(window).load(function () {
     	 
      });
      
-
+     $(document).on ("click",".api-slide-toggle-all",function () {
+         //$(this).next().next().slideToggle();
+         var buttonAPISlideToggle = $('.api-slide-toggle-all');
+         $(".api-slide-toggle").closest(".row").next().slideToggle(function () {
+             $(this).is(':hidden') ? buttonAPISlideToggle.text('Expand') : buttonAPISlideToggle.text('Collapse');
+         });
+     });
+     
      /**
       * Event : click 
       * Description : toggle api-parent

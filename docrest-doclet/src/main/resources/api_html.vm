@@ -28,6 +28,7 @@
                 ${readme}
             </p>
          #end 
+        <button class="api-slide-toggle-all btn btn-md">Expand</button>
         <div class = "authorization-dialog"></div>   
         <ul class="restAPIs">
             #set( $index = 0 )
@@ -43,7 +44,9 @@
                   #set( $i = $i +1 )
                 
                     #foreach( $rp in $resource.paths )
+                       
                         #if( $velocityCount > 1),&nbsp;#end <a href ="#${rp}" data-goto = "false" class="link api-slide-toggle_one_level" id = "${rp}"> #if($rp == "/" || $rp=="") /#else /${rp}#end <!--/${rp}--></a>
+                        
                     #end
                     <ul class="restAPIs"> #* main group {domain} *#
                         #foreach( $method in $resource.methods )
