@@ -436,10 +436,10 @@ public class DocRestDoclet {
 
     public String getReturnType(String className, MethodDoc methodDoc) {
         String methodName = methodDoc.name();
-        // LOG.info("-------------- Method name: " + methodName);
+         LOG.info("-------------- Method name: " + methodName);
         try {
-//            LOG.info(this.getClass().getClassLoader());
-            Class c = Class.forName(className);
+
+            Class<?> c = Class.forName(className);
 
             // build parameter class list
 
@@ -461,8 +461,9 @@ public class DocRestDoclet {
             return rm.getGenericReturnType().toString();
         } catch (ClassNotFoundException e) {
             LOG.warning("getReturnType ClassNotFound " + className + " " + e.getMessage());
-            e.printStackTrace();
-            return className;
+            
+           // e.printStackTrace();
+            return "java.lang.Object";
         } catch (NoSuchMethodException e) {
             LOG.warning("getReturnType NoSuchMethod " + methodName + " " + e.getMessage());
             e.printStackTrace();
@@ -475,6 +476,7 @@ public class DocRestDoclet {
         String methodName = methodDoc.name();
         // LOG.info("-------------- Method name: " + methodName);
         try {
+            
             Class c = Class.forName(classDoc.qualifiedName());
 
             // build parameter class list
@@ -1007,7 +1009,7 @@ public class DocRestDoclet {
         for (String t : jsonDocMap.keySet()) {
 
             // examples:
-
+            
             String findString = t;
 
             int diff = memberType.length() - findString.length() - memberType.indexOf(findString);
@@ -1019,6 +1021,7 @@ public class DocRestDoclet {
         List<String> ignoreList = Arrays.asList("java.util.List","java.util.Collection", "java.util.ArrayList");
         if (ignoreList.contains(returnValue)) {
             final String detailsType = getReturnType(className, methodDoc);
+            LOG.info(returnValue + ">>>>>>detailsType : " + detailsType + " " + methodDoc.returnType().qualifiedTypeName());
             if (isGekkoOrDmiPackage(detailsType)) {
                 try {
                     Class c = Class.forName(detailsType);

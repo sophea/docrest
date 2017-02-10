@@ -442,6 +442,11 @@ ul > li .api-path-put {
 .responseCode_500 , .responseCode_509 {
       color:#d40011;
 }
+
+.hide-element {
+    display: none;
+}
+
 pre {
     white-space: pre-wrap;       /* Since CSS 2.1 */
     white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
@@ -465,7 +470,8 @@ pre {
     top: 0px;
     border: 1px solid #ccc;
     border-top: 0;
-    border-right: 0;	
+    border-right: 0;
+    background-color: #ffffff;
 }
 /****** End : Clip Board******/
 

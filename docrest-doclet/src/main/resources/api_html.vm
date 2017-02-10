@@ -28,7 +28,7 @@
                 ${readme}
             </p>
          #end 
-        <button class="api-slide-toggle-all btn btn-md">Expand</button>
+        <button class="api-slide-toggle-all btn btn-md hidden-print">Expand</button>
         <div class = "authorization-dialog"></div>   
         <ul class="restAPIs">
             #set( $index = 0 )
@@ -411,7 +411,7 @@
                                     <td>
                                        ${memberName}
                                     </td>
-                                    <td>${helper.renderTypeWithDetailObject($memberType, $className,$m)}</td>
+                                    <td>${helper.renderTypeWithDetailObject($memberType, $className, $m)}</td>
                                     <td>
                                         ${helper.getFieldComment($jd,$memberName)}
                                     </td>
