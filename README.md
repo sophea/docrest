@@ -90,45 +90,34 @@ To use DocRest in a project please make the following changes to pom.xml with pr
 ==================================
 @RestReturn , @RestCode
 
-
-    /**
-     * <pre>
-     * get my dashboard view 
+     /** <p>
+     * reset password is used by only user of type resource owner passwords.
+     * This function will send an email as html content with a deep link to user base on appType.
+     * <p/>
      * 
-     * -List of Top  latest Offers
-     * - List of Categories
-     * </pre>
-     * 
-     * 
-     * @param brand set to true to get inner brand objects. optional true/false, default value is false. boolean
-     * @param favorite set to true if you want favorite is populated, default value false. boolean
-     * @param ratings set to true to get rating results included - default value false . boolean
-     * @param request 
-     * 
-     * 
+     * @param username Username for login value is email address.
+     * @param appType Application type which is used to generate deep link send in email content. Values:
+     *            <ul>
+     *            <li>1 - for iOS</li>
+     *            <li>2 - for Android</li>
+     *            <li>3 - for web</li>
+     *            </ul>
      */
-    @RestReturn(value=void.class, code={
-        @RestCode(code=200, description="OK", message="OK")
-    })
-    @RequestMapping(value="dashboard", method=RequestMethod.GET)
-    @ResponseBody
-    public ResponseEntity myDashboard(HttpServletRequest request,
-            @RequestParam(value = "brand", defaultValue = "false") boolean brand,
-            @RequestParam(value = "favorite", defaultValue = "false") boolean favorite,
-            @RequestParam(value = "ratings", defaultValue = "false") boolean ratings
-            ) {
-
-        final Map<String,Object> body = service.myDashboard(10, WebHelper.getUserId(request), brand, favorite, ratings); 
-
-        return new ResponseEntity(body, HttpStatus.OK);
+    @RestReturn(highlightApiMessage = "resetpassword", value = ResponseEntity.class, entity = ResponseEntity.class,
+                codes = @RestCodes(codes = "200,401,403,404,500"))
+    @RequestMapping(value = "v1/user/resetpassword", method = RequestMethod.POST, params = "username")
+    @ResponseStatus(HttpStatus.OK)
+    @Authorization(userRoles = { UserRole.ROLE_USER_CREDENTIALS })
+    public void resetPassword(HttpServletRequest request, @RequestParam String username,
+            @RequestParam(required = false, defaultValue = "3") Long appType) {
+    	   ...
     }
-    
 
 
- Generate rest api documentation
+# Generate rest api documentation
  ====================================
 
- mvn javadoc:javadoc -Pjavadoc
+ mvn clean install -Pjavadoc
  
  Tip
  =====
@@ -137,5 +126,7 @@ To use DocRest in a project please make the following changes to pom.xml with pr
        
 
 # ====Release new version and deploy===
+
 $ mvn release:clean release:prepare
+
 $ mvn deploy
