@@ -11,58 +11,82 @@ REST API documentation how to access REST-API
 integrated with your project
 ============================
 
-To use DocRest in a project please make the following changes to pom.xml:
+To use DocRest in a project please make the following changes to pom.xml with profile: mvn clean install -Pjavadoc 
 
-
-       <dependency>
-            <groupId>com.wadpam</groupId>
-            <artifactId>docrest-api</artifactId>
-            <version>1.37</version>
-            <scope>compile</scope>
-        </dependency>
+```
+      
         <dependency>
             <groupId>com.wadpam</groupId>
             <artifactId>docrest-doclet</artifactId>
-            <version>1.31</version>
+            <version>1.41</version>
             <scope>compile</scope>
         </dependency>
+	
+ <profile>
+            <id>javadoc</id>
+            <build>
+            <plugins>
+                <plugin>
+                  <artifactId>maven-dependency-plugin</artifactId>
+                  <executions>
+                    <execution>
+                      <phase>package</phase>
+                      <goals>
+                        <goal>copy-dependencies</goal>
+                      </goals>
+                      <configuration>
+                        <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                      </configuration>
+                    </execution>
+                  </executions>
+                </plugin>
+                <plugin>
+                  <artifactId>maven-antrun-plugin</artifactId>
+                  <version>1.8</version>
+                  <executions>
+                    <execution>
+                      <phase>package</phase>
+                      <configuration>
+                        <!-- output dirs -->
+                        <target name="docrest">
+                          <property name="build.dir" location="target" />
+                          <property name="lib.dir" location="${build.dir}/lib" />
+                          <property name="classes" value="${build.dir}/classes" />
+                          <property name="gen-src.dir" value="${build.dir}/generated-sources" />
+                          <path id="buildClasspath">
+                            <fileset dir="${lib.dir}">
+                              <include name="**/*.jar" />
+                              <exclude name="test/**" />
+                            </fileset>
+                            <pathelement location="${classes}" />
+                          </path>
+                          <javadoc sourcepath="src/main/java" author="false"
+                            encoding="UTF-8" source="1.7" classpathref="buildClasspath"
+                            verbose="false">
+                            <doclet name="com.wadpam.docrest.DocRestDoclet"
+                              pathref="buildClasspath">
+                              <param name="-basePath" value="unknown" />
+                              <param name="-baseUrl" value="unknown" />
+                              <param name="-clientId" value="unknown" />
+                              <param name="-d"
+                                value="${build.dir}/docrest/${project.name}/${project.version}" />
+                            </doclet>
+                          </javadoc>
+                        </target>
+                      </configuration>
+                      <goals>
+                        <goal>run</goal>
+                      </goals>
+                    </execution>
+                  </executions>
+                </plugin>
+              </plugins>
+            </build>
+        </profile>
+                 
+```                    
 
-                  <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.8</version>
-                        <executions>
-                            <execution>
-                                <id>javadoc-docrest</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>javadoc</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                       <configuration>
-		                    <author>false</author>
-		                    <doclet>com.wadpam.docrest.DocRestDoclet</doclet>
-		                    <docletArtifact>
-		                        <groupId>com.wadpam</groupId>
-		                        <artifactId>docrest-doclet</artifactId>
-		                        <version>${docrest.version}</version>
-		                    </docletArtifact>
-		                    <encoding>UTF-8</encoding>
-		                    <javadocExecutable>${javadocExecutable}</javadocExecutable>
-		                    <sourcepath>src/main/java</sourcepath>
-		                    <useStandardDocletOptions>false</useStandardDocletOptions>
-		                    <verbose>true</verbose>
-		                    <includeDependencySources>true</includeDependencySources>
-		                    <includeTransitiveDependencySources>true</includeTransitiveDependencySources>
-		                    <dependencySourceIncludes>
-		                    	<dependencySourceInclude>com.wadpam.openserver:*</dependencySourceInclude>
-		                    </dependencySourceIncludes>
-                	</configuration>
-                    </plugin>
-                    
-
-How to use rest-doclet annotation
+# How to use rest-doclet annotation
 ==================================
 @RestReturn , @RestCode
 
@@ -112,6 +136,6 @@ How to use rest-doclet annotation
  - Optional readme-docrest.txt file directly under project directory will be used as top guideline of REST API
        
 
-====Release new version and deploy===
->>mvn release:clean release:prepare
->>mvn deploy
+# ====Release new version and deploy===
+$ mvn release:clean release:prepare
+$ mvn deploy
