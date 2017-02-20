@@ -132,14 +132,52 @@ To use DocRest in a project please make the following changes to pom.xml with pr
  check the docrest site  in target/site/apidocs/api.html
  
  
- # Tip
+# Tip
  =====
  - @RequestParam(required=false) - Please add 'required' to every RequestParam. It produces better DocRest. Value should be true or false. 
  - Optional readme-docrest.txt file directly under project directory will be used as top guideline of REST API
        
-
+# readme-docrest.txt file
+```
+Optional readme-docrest.txt file directly under project directory will be used as top guideline of REST API code
+backend-projectName 
+   + readme-docrest.txt
+   + ivy.xml
+   + build.xml
+   + src
+   + ...
+ 
+===================the sample content readme-docrest.txt file========
+<!-- server URLs : enable for real servers -->
+<script type="text/javascript">
+    var serverUrls =["http://staging-m.isic.org"];
+    //alert(serverUrls);
+</script>
+ 
+<pre>
+This backend is about for handling endpoints REST-APIs and response as Json format and response back to client-apps (iOS, Android,Mobile-Web, 3rd party and more...)
+ 
+Each REST-API Request must start with /api.
+ 
+====================================================================
+ 
+Backend most REST-APIs supported request Content-Type : <b>"application/x-www-form-urlencoded"  , "application/x-www-form-urlencoded charset=utf-8" </b>
+ 
+App client should use this Content-Type when making a call REST-API Backend.
+ 
+However some REST-APIs are supported request Content-Type : application/json  as well , please see REST-DOC API documentation below: 
+ 
+  
+====================================================================
+Monitor REST-API GET: http://localhost:8080/monitor
+ 
+</pre>
+```
 # ====Release new version and deploy===
 
 $ mvn release:clean release:prepare
 
 $ mvn deploy
+
+
+
