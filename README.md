@@ -131,6 +131,16 @@ To use DocRest in a project please make the following changes to pom.xml with pr
  
  check the docrest site  in target/site/apidocs/api.html
  
+# screen shoot
+<p align="center">
+  <img src="screenshoot/1.png"/>
+  <img src="screenshoot/2.png"/>
+  <img src="screenshoot/3.png"/>
+  <img src="screenshoot/4.png"/>
+  <img src="screenshoot/6.png"/>
+</p>
+
+
  
 # Tip
  =====
