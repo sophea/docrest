@@ -296,18 +296,19 @@ $(window).load(function () {
       * @param contentType
       * @param rootElement
       */
-     function ajaxRequest(url, requestMethod, data, contentType, rootElement) {
+     function ajaxRequest(url, requestMethod, data, contentType, rootElement, headers) {
+
          $.ajaxSetup({
-             headers: {
-                 Accept: "application/javascript charset=utf-8",
-                 Accept: "text/html charset=utf-8",
-                 Accept: "application/json; charset=utf-8"
-             },
-             dataType: 'json',
-             cache: false,
-             crossDomain: true
+            headers : {
+                Accept : "application/javascript charset=utf-8",
+                Accept : "text/html charset=utf-8",
+                Accept : "application/json; charset=utf-8"
+            },
+            dataType : 'json',
+            cache : false,
+            crossDomain : true
          });
-         var curl = populateCurl(url, requestMethod, data, contentType);
+         var curl = populateCurl(url, requestMethod, data, contentType, headers);
          rootElement.find("#curl").empty();
          rootElement.find("#curl").append(helper.encodeHtmlEntity(curl));
          rootElement.find("#curl").append(helper.SPAN);
@@ -320,7 +321,13 @@ $(window).load(function () {
                  url: url,
                  type: requestMethod,
                  data: data,
-                 contentType: contentType
+                 contentType: contentType,
+                 beforeSend: function(request){
+                     $.each(headers,function(index, header){
+                         var key = Object.keys(header)[0];
+                         request.setRequestHeader(key, header[key]);
+                     });
+                 }
              })
              // using the done promise callback
              .done(function (data) {
@@ -370,20 +377,30 @@ $(window).load(function () {
       * Support content type: "application/json", "application/x-www-form-urlencoded"
       * Not support : "multipart/form-data"
       * */
-     function populateCurl(url, requestMethod, data, contentType) {
+     function populateCurl(url, requestMethod, data, contentType, headers) {
          var cUrl = [];
         // generate method
         cUrl.push('-X ' + requestMethod.toUpperCase());
 
         // generate headers
         if (!contentType) {
-            contentType = "application/json;charset=UTF-8";
+            headers.push({
+                "Content-Type" : "application/json;charset=UTF-8"
+            });
+        } else {
+            headers.push({
+                "Content-Type" : contentType
+            });
         }
 
-        if (typeof contentType == 'string') {
-            contentType = contentType.replace(/\'/g, '\\u0027');
-        }
-        cUrl.push('--header \'Content-Type : ' + contentType + '\'');
+        $.each(headers,function(index, header){
+           var key =Object.keys( header)[0];
+           var value = header[key];
+           if (typeof value == 'string') {
+               value = value.replace(/\'/g, '\\u0027');
+           }
+           cUrl.push('--header \''+ key + ':'+ value + '\'');
+        });
 
         // generate data
         var isFormData = false;
@@ -535,9 +552,9 @@ $(window).load(function () {
              url = prepareURL(rootElement);
              requestMethod = rootElement.find(".request_method").val();
              contentType = getContentType(rootElement, requestMethod);
-             console.log("log request :", url, requestMethod, contentType);
              data = prepareData(requestMethod, contentType, rootElement);
-             ajaxRequest(url, requestMethod, data, contentType, rootElement);
+             var headers = prepareHeaders(rootElement);
+             ajaxRequest(url, requestMethod, data, contentType, rootElement, headers);
          } catch (e) {
              if (e instanceof InvalidArgumentException) {
                  /* do something */
@@ -550,10 +567,29 @@ $(window).load(function () {
          event.preventDefault();
      });
      
+     /*
+      * Method : prepareHeaders
+      * Description : get header from input header form
+      * */
+     function prepareHeaders(rootElemet){
+         var rows = rootElemet.find(".request-headers").find(".row");
+         var headers = [];
+         $.each(rows, function(key, row) {
+            var key = $(row).find(".key-input").val();
+            var value = $(row).find(".value-input").val();
+            if (key && value) {
+                var obj = {};
+                obj[key] = value
+                headers.push(obj);
+            }
+         });
+         return headers;
+     }
+     
      /**
-      * Method : anonymous
-      * Description : process of click event which get default value JSON body.
-      */
+         * Method : anonymous Description : process of click event which get
+         * default value JSON body.
+         */
      $(document).on ("click",".get-json-body",function (){
     	 
     	 if ( $(this).data("content-type") == "application/json" || $(this).data("content-type").indexOf("application/json") > -1 ) {
@@ -951,11 +987,47 @@ $(window).load(function () {
         }
      });
      
+
+
+     $(document).on("focus", ".focus-add-header", function() {
+        var clone = $(this).closest(".row").clone();
+        var closesRow = $(this).closest(".row");
+        var parent = $(this).closest(".request-headers");
+        var firstRow = $(parent).find(".row:first-child");
+        var row = $(this).closest(".request-headers");
+
+        // remove class focus-add-header: when focus again will not create new
+        // row
+        $(closesRow).find(".focus-add-header").removeClass("focus-add-header");
+
+        // remove class hidden : to show remove button
+        $(closesRow).find(".hidden").removeClass("hidden");
+        // add class hidden to button : to hide remove button at last row
+        $(clone).find("button").addClass("hidden");
+
+        // append new row to request headers container
+        $(clone[0]).appendTo($(this).closest(".request-headers"));
+
+        // hide all request header label
+        $(parent).find(".request-header-label").addClass("hidden")
+
+        // show the request header label to the first row
+        $(firstRow).find(".request-header-label").removeClass("hidden");
+     });
+
+    $(document).on("click", ".remove-header-row", function() {
+        var parent = $(this).closest(".request-headers");
+        $(this).closest(".row").remove();
+        var firstRow = $(parent).find(".row:first-child");
+        // show the request header label to the first row
+        $(firstRow).find(".request-header-label").removeClass("hidden");
+    });
+     
      /**
-      * Method : cloneObject
-      * Description : clone template object
-      * @param parentElement
-      */
+         * Method : cloneObject Description : clone template object
+         * 
+         * @param parentElement
+         */
      function cloneObject(parentElement) {
          var $template = $(".template"),
            	 $clone = $template.clone().removeClass('hide template'); 

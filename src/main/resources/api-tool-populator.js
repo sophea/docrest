@@ -249,6 +249,55 @@ function populateRequestParam(keyValuePairs) {
 }
 
 /**
+ * Method : populateHearder
+ */
+function populateHearder() {
+    var columns=[];
+    var label = populateElement("label", {
+        class : "request-header-label"
+    }, null, "Request headers");
+    columns.push( populateElement("div", {
+        "class": "col-md-2"
+    }, toArray(label) ));
+    var inputKey = populateInputField({
+        "type" : "text",
+        "class" : "form-control key-input focus-add-header" ,
+        "name" : "key[]",
+        "placeholder" : "key",
+    });
+
+   var inputValue = populateInputField({
+        "type": "text",
+        "class": "form-control value-input focus-add-header",
+        "name": "param[]",
+        "placeholder": "value",
+    });
+    var span = populateElement("span", {
+        "class" : "glyphicon glyphicon-minus"
+    });
+    var button = populateElement("button", {
+        "type" : "button",
+        "class" : "btn btn-danger remove-header-row hidden",
+        "style" : "padding: 9px 12px;"
+    }, toArray(span));
+    columns.push(populateElement("div", {
+        "class" : "col-md-4"
+    }, toArray(inputKey)));
+    columns.push(populateElement("div", {
+        "class" : "col-md-4"
+    }, toArray(inputValue)));
+    columns.push(populateElement("div", {
+        "class" : "col-md-1"
+    }, toArray(button)));
+    var row = populateElement("div", {
+        "class" : "row"
+    }, columns)
+    return populateElement("div", {
+        "class" : "request-headers"
+    }, toArray(row));
+}
+
+/**
  * Method : anonymous
  * Description : create row of key-value-pair  
  */
@@ -602,6 +651,7 @@ function populateAPI(index, contentType, requestMethod, restPath, keyValuePairs,
 	rows.push ( populateRestPath(requestMethod, restPath) );
 	rows.push ( populateRequestParam(keyValuePairs) );
 	rows.push ( populateAccessToken() );
+	rows.push ( populateHearder() );
 	rows.push ( populateRequestBody(index) );
 	rows.push ( populateCurlElement() );
 	rows.push ( populateResponseBody() );
