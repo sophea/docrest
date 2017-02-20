@@ -7,6 +7,16 @@ docrest
 
 REST API documentation how to access REST-API
 
+Features
+========
+
+- Support swagger json 2.0 format
+- html docrest pages with nice UI testing with real server
+- support PostMan tool Test APIs
+- integrate with oauth2 access_token flow
+- support and produc curl command
+- easy doc-rest annotation
+- easy to integration any backend projects + spring framework
 
 integrated with your project
 ============================
@@ -18,7 +28,7 @@ To use DocRest in a project please make the following changes to pom.xml with pr
         <dependency>
             <groupId>com.wadpam</groupId>
             <artifactId>docrest-doclet</artifactId>
-            <version>1.41</version>
+            <version>2.0.0</version>
             <scope>compile</scope>
         </dependency>
 	
