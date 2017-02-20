@@ -127,9 +127,12 @@ To use DocRest in a project please make the following changes to pom.xml with pr
 # Generate rest api documentation
  ====================================
 
- mvn clean install -Pjavadoc
+ $ mvn clean install -Pjavadoc
  
- Tip
+ check the docrest site  in target/site/apidocs/api.html
+ 
+ 
+ # Tip
  =====
  - @RequestParam(required=false) - Please add 'required' to every RequestParam. It produces better DocRest. Value should be true or false. 
  - Optional readme-docrest.txt file directly under project directory will be used as top guideline of REST API
