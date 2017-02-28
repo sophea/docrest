@@ -281,7 +281,7 @@ function populateHearder() {
         "style" : "padding: 9px 12px;"
     }, toArray(span));
     columns.push(populateElement("div", {
-        "class" : "col-md-4"
+        "class" : "col-md-4 ui-widget"
     }, toArray(inputKey)));
     columns.push(populateElement("div", {
         "class" : "col-md-4"

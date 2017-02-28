@@ -27,6 +27,52 @@ function Helper() {
          return buf.join('');
      };
      
+     /******headers*******/ 
+     this.headers = [
+         "Accept",
+         "Accept-Charset",
+         "Accept-Encoding",
+         "Accept-Language",
+         "Access-Control-Request-Headers",
+         "Access-Control-Request-Method",
+         "Authorization",
+         "Cache-Control",
+         "Connection",
+         "Content-Length",
+         "Content-MD5",
+         "Content-Transfer-Encoding",
+         "Content-Type",
+         "Cookie",
+         "Cookie 2",
+         "DNT",
+         "Date",
+         "Expect",
+         "From",
+         "Host",
+         "If-Match",
+         "If-Modified-Since",
+         "If-None-Match",
+         "If-Range",
+         "If-Unmodified-Since",
+         "Keep-Alive",
+         "Max-Forwards",
+         "Origin",
+         "Pragma",
+         "Proxy-Authorization",
+         "Range",
+         "Referer",
+         "TE",
+         "Trailer",
+         "Transfer-Encoding",
+         "Upgrade",
+         "User-Agent",
+         "Via",
+         "Warning",
+         "X-Do-Not-Track",
+         "X-Requested-With" 
+     ];
+     /*******End: header *********/
+     
      /**
       * Replace values in String 
       */
@@ -141,6 +187,11 @@ $(window).load(function () {
 			$(this).closest (".api-path").find (".generate-default-form").show(); 
 		}
 	});
+
+    /*********Add auto complete to first input of request header ********/
+    $(".request-headers .key-input").autocomplete({
+      source: helper.headers
+    });
 	
 	/* Set available link to generate Sample Resource if the content-type equal "application/json" */
 	$(".get-json-body").each(function(index){
@@ -1013,6 +1064,11 @@ $(window).load(function () {
 
         // show the request header label to the first row
         $(firstRow).find(".request-header-label").removeClass("hidden");
+
+        // add auto complete to newest input key of request header
+        $(closesRow).find(".key-input").autocomplete({
+            source: helper.headers
+        });
      });
 
     $(document).on("click", ".remove-header-row", function() {

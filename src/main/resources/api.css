@@ -480,3 +480,18 @@ pre {
   padding: 5px;    
 }
 /****** End: API Path Hidden ******/
+
+
+ /************ auto complete*******************/
+ 
+ .ui-menu.ui-widget.ui-widget-content.ui-autocomplete {
+    max-height: 164px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+ }
+ /**********End: auto complete********************/
+ 
+ 
+ 
+ 
+ 
