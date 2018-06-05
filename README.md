@@ -150,17 +150,29 @@ To use DocRest in a project please make the following changes to pom.xml with pr
 # readme-docrest.txt file
 ```
 Optional readme-docrest.txt file directly under project directory will be used as top guideline of REST API code
-backend-projectName 
+backend-projectName (ant/ivy)
    + readme-docrest.txt
    + ivy.xml
    + build.xml
    + src
    + ...
  
+ backend-project (maven)
+   + readme-docrest.txt
+   + pom.xml
+   + src
+   + ....
+   
+ backend-project (gradle)
+   + readme-docrest.txt
+   + build.gradle
+   + gralde.properties
+   + src
+   + ....
 ===================the sample content readme-docrest.txt file========
 <!-- server URLs : enable for real servers -->
 <script type="text/javascript">
-    var serverUrls =["http://staging-m.isic.org"];
+    var serverUrls =["http://servername.company.com"];
     //alert(serverUrls);
 </script>
  

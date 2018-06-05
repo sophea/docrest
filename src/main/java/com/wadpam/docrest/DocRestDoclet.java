@@ -121,13 +121,16 @@ public class DocRestDoclet {
     /**
      * Not primitive or String, we need to know more its members
      */
-    protected static void appendJsonMembers(StringBuffer sb, String entityName, String indent, Class child)
-            throws ClassNotFoundException {
+    protected static void appendJsonMembers(StringBuffer sb, String entityName, String indent, Class child,
+            Class defaultGenericObject)
+                    throws ClassNotFoundException {
         Class c = Class.forName(entityName);
+        // com.goldengekko.docrest.test.ResponseList<com.goldengekko.docrest.test.Child>
+
         // LOG.info("  Producing JSON/HTML for " + c);
         // recursion with it parents
         if (null != c.getSuperclass() && !Object.class.equals(c.getSuperclass())) {
-            appendJsonMembers(sb, c.getSuperclass().getName(), indent, c);
+            appendJsonMembers(sb, c.getSuperclass().getName(), indent, c, defaultGenericObject);
         }
 
         // Should show it as menus or navigations too
@@ -155,14 +158,14 @@ public class DocRestDoclet {
         // List all of attributes of the entity
         for (int i = 0; i < fields.length; i++) {
             //ignore
-            
+
             // exclude static field
             if (!isStaticField(fields[i])) {
 
                 // @JsonIgnore excluded and @JsonIgnorProperies excluded
                 if (!isJsonIgnoreFiled(fields[i])  ) {
                     if (!ignoreProperties.contains(fields[i].getName())) {
-                        
+
                         String fieldNameValue = String.format("<b>\"%s\"</b>:", fields[i].getName());
                         if (sb.toString().contains(fieldNameValue)) {
                             continue;
@@ -174,11 +177,12 @@ public class DocRestDoclet {
                         String paramClass = fields[i].getType().getName();
                         String genericType = "?";
 
-                        genericType = getGenericType(fields[i]);
+                        genericType = getGenericType(fields[i], defaultGenericObject);
 
                         // limit scope to detail, within root docs only, custom
                         // data type in this project
                         ClassDoc p = classDocs.get(paramClass);
+                        LOG.info(fieldNameValue + "" + paramClass);
                         //If type domain is T , and element is selfReference Type, in this case just display Object
                         // see Content.java ( filed Content prooduct)
                         if (null != p && !entityName.equals(p.qualifiedName())) {
@@ -195,6 +199,7 @@ public class DocRestDoclet {
                             else if (List.class.getName().startsWith(paramClass)) {
                                 sb.append(List.class.getSimpleName() + "&lt;" + getTypeQualifiedName(genericType) + "&gt;");
                             } else {
+
                                 // outside scope, no need to give more detail,
                                 // it should be a standard type
                                 sb.append(fields[i].getType().getSimpleName());
@@ -220,13 +225,16 @@ public class DocRestDoclet {
         return "";
     }
 
-    protected static String getGenericType(Field field) {
+    protected static String getGenericType(Field field, Class defaultGenericObject) {
 
         String genericType = "";
         try {
             ParameterizedType type = (ParameterizedType) field.getGenericType();
             genericType = type.getActualTypeArguments()[0].toString();
-            // LOG.info("++++++++++++++++++parameter->" + genericType);
+            LOG.info("++++++++++++++++++parameter->" + genericType);
+            if (genericType.equals("T") && defaultGenericObject != null) {
+                return defaultGenericObject.getName();
+            }
         } catch (ClassCastException exc) {
             // Do nothing
         }
@@ -264,6 +272,8 @@ public class DocRestDoclet {
      * Generate JSON string format to display on HTML page
      */
     protected static String getJson(String className, String entityName, String indent) {
+        LOG.info("className:" + className);
+        String genericClass = null;
         final StringBuffer sb = new StringBuffer();
         // Iterable
         if (className.startsWith(List.class.getName()) || className.endsWith("]")) {
@@ -272,6 +282,9 @@ public class DocRestDoclet {
         } else if (className.startsWith(Collection.class.getName())) {
             className = Collection.class.getName();
             sb.append('[');
+        } else if (className.endsWith("ResponseList")) {
+            genericClass = entityName;
+
         } else if (null == entityName) {
             // default value of entity
             entityName = className;
@@ -280,8 +293,7 @@ public class DocRestDoclet {
         if (null != entityName) {
             LOG.info(">>>>entityName : " + entityName);
             ClassDoc classDoc = rootDoc.classNamed(entityName);
-            // LOG.info("JSON lookup " + className + "<" + entityName +
-            // ">  gives " + classDoc);
+            LOG.info("JSON-lookup " + className + "<" + entityName + ">  gives " + classDoc);
 
             if (null == classDoc) {
                 return entityName;
@@ -293,6 +305,9 @@ public class DocRestDoclet {
                 jsonDocMap.put(entityName, classDoc);
             }
 
+            if (genericClass != null) {
+                entityName = className;
+            }
             // should be JSON's basic types
             if (String.class.getName().equals(entityName)) {
                 sb.append(String.class.getSimpleName());
@@ -313,26 +328,11 @@ public class DocRestDoclet {
                 sb.append("{");
                 try {
                     // display deeper, more detail, not only simple name here
-                    appendJsonMembers(sb, entityName, indent, null);
+                    Class c = genericClass != null ? Class.forName(genericClass) : null;
+                    appendJsonMembers(sb, entityName, indent, null, c);
                 } catch (ClassNotFoundException e) {
+                    LOG.info("ERROR:" + e.getMessage());
 
-                    // Class c = Class.forName(entityName);
-                    // Java's Extension Directories is kept in Java's System
-                    // Property "java.ext.dirs".
-
-                    // Example
-                    // com.sma.offers.json.JBrand
-                    // java.lang.ClassNotFoundException:
-                    // com.sma.offers.json.JBrand
-                    // LOG.info(e.toString());
-
-                    // Alternative, same entity
-                    // List all of attributes of the entity, all getter methods
-                    // (similar to attributes) from classDoc
-
-                    // Should show it as menus or navigations too
-                    // listed at the very top of the page under JSON objects.
-                    // Class c = Class.forName(entityName);
                     if (isInScopeOf(classDocs, entityName)) {
                         jsonClassMap.put(entityName, null);
                     }
@@ -348,7 +348,6 @@ public class DocRestDoclet {
                             sb.append(getMemberName(method.name()));
                             sb.append("\"</b>&nbsp;:&nbsp;");
                             String paramClass = method.returnType().qualifiedTypeName();
-                            // ClassDoc p = classDocs.get(paramClass);
                             // LOG.info(String.format("    -- for return attribute \"%s\" : %s the classDoc is "
                             // + p,
                             // getMemberName(method.name()), paramClass));
@@ -384,7 +383,7 @@ public class DocRestDoclet {
         // by default, it should be classDocs
         if (null == classMaps) {
             classMaps = classDocs;
-            
+
         }
         return null != classMaps.get(qualifiedName);
     }
@@ -436,7 +435,7 @@ public class DocRestDoclet {
 
     public String getReturnType(String className, MethodDoc methodDoc) {
         String methodName = methodDoc.name();
-         LOG.info("-------------- Method name: " + methodName);
+        LOG.info("-------------- Method name: " + methodName);
         try {
 
             Class<?> c = Class.forName(className);
@@ -461,8 +460,8 @@ public class DocRestDoclet {
             return rm.getGenericReturnType().toString();
         } catch (ClassNotFoundException e) {
             LOG.warning("getReturnType ClassNotFound " + className + " " + e.getMessage());
-            
-           // e.printStackTrace();
+
+            // e.printStackTrace();
             return "java.lang.Object";
         } catch (NoSuchMethodException e) {
             LOG.warning("getReturnType NoSuchMethod " + methodName + " " + e.getMessage());
@@ -471,12 +470,12 @@ public class DocRestDoclet {
         return "";
     }
 
-    
+
     public static String getReturnType(ClassDoc classDoc, MethodDoc methodDoc) {
         String methodName = methodDoc.name();
         // LOG.info("-------------- Method name: " + methodName);
         try {
-            
+
             Class c = Class.forName(classDoc.qualifiedName());
 
             // build parameter class list
@@ -633,10 +632,10 @@ public class DocRestDoclet {
         return result;
     }
 
-  //use by template velocity template
+    //use by template velocity template
     public static boolean isJsonIgnoreFiledsWithParentClass(String entityName, String property) {
         try {
-            
+
             Class c = Class.forName(entityName);
             Set<String> ignoredProperties = getClassIgnoreProperties(c);
             if (ignoredProperties.contains(property)) {
@@ -654,7 +653,7 @@ public class DocRestDoclet {
         }
         return false;
     }
-    
+
     public static boolean isJsonIgnoreFiled(String entityName, String property) {
         try {
             Class c = Class.forName(entityName);
@@ -690,10 +689,10 @@ public class DocRestDoclet {
         } else if ("-doctitle".equals(option)) {
             // https://discuss.gradle.org/t/javadoc-task-passes-standard-doclet-options-to-javadoc-command-even-when-a-custom-doclet-is-specified/870
             return 2;   // the -doctitle option is ignored, and is here to deal with a gradle bug
-                        // that always passes it to javadoc, even if a custom doclet is used
+            // that always passes it to javadoc, even if a custom doclet is used
         } else if ("-windowtitle".equals(option)) {
             return 2;   // the -windowtitle option is ignored, and is here to deal with a gradle bug
-                        // that always passes it to javadoc, even if a custom doclet is used
+            // that always passes it to javadoc, even if a custom doclet is used
         }
 
         return 0;
@@ -715,7 +714,7 @@ public class DocRestDoclet {
         if (pwd.length > 0) {
             fileName = pwd[0] + "/readme-docrest.txt";
         }
-        
+
         try {
             bReader = new BufferedReader(new FileReader(new File(fileName)));
             while ((line = bReader.readLine()) != null) {
@@ -796,7 +795,7 @@ public class DocRestDoclet {
      */
     public static String sortString(String st) {
         String[] stArray = st.split(","); // stArray[0] = "400 = C", stArray[1]
-                                          // = "300 = B", .....
+        // = "300 = B", .....
         for (int i = 0; i < stArray.length; i++) {
             stArray[i] = stArray[i].trim();
         }
@@ -875,7 +874,7 @@ public class DocRestDoclet {
         if (null != destinationFolder && false == destinationFolder.exists()) {
             destinationFolder.mkdirs();
         }
-        
+
         // copy css file
         final InputStream cssIn = getClass().getResourceAsStream("/api.css");
         final File cssFile = new File(destinationFolder, "api.css");
@@ -887,7 +886,7 @@ public class DocRestDoclet {
         }
         cssOut.close();
         cssIn.close();
-         
+
         //copy api-tool-populator.js
         final InputStream apiToolPopulatorIn = getClass().getResourceAsStream("/api-tool-populator.js");
         final File apiToolPopulatorJsFile = new File(destinationFolder, "api-tool-populator.js");
@@ -895,11 +894,11 @@ public class DocRestDoclet {
         while (0 < (count = apiToolPopulatorIn.read(b))) {
             apiToolPopulatorOut.write(b, 0, count);
         }
-        
+
         apiToolPopulatorOut.close();
         apiToolPopulatorIn.close();
-        
-        
+
+
         //copy api-tool.js
         final InputStream apiToolIn = getClass().getResourceAsStream("/api-tool.js");
         final File apiToolJsFile = new File(destinationFolder, "api-tool.js");
@@ -909,8 +908,8 @@ public class DocRestDoclet {
         }
         apiToolOut.close();
         apiToolIn.close();
-        
-        
+
+
         final PrintWriter writer = new PrintWriter(javaFile);
         Template template;
         try {
@@ -952,10 +951,10 @@ public class DocRestDoclet {
         }
         return canonicalName.replaceAll("[\\.\\/\\{\\}\\(\\)]", "").toLowerCase();
     }
-    
+
     public String renderType(String memberType) {
         String returnValue = memberType;
-        
+
         for (String t : jsonDocMap.keySet()) {
 
             String findString = t;
@@ -975,7 +974,7 @@ public class DocRestDoclet {
     /**renderTypeWithDetailObjectExtraJson*/
     public String renderTypeWithDetailObjectExtraJson(String memberType, String className, MethodDoc methodDoc) {
         String returnValue = memberType;
-       
+
         List<String> ignoreList = Arrays.asList("java.util.List","java.util.Collection", "java.util.ArrayList");
         if (ignoreList.contains(returnValue)) {
             final String deailsType = getReturnType(className, methodDoc);
@@ -986,11 +985,11 @@ public class DocRestDoclet {
 
         return returnValue;
     }
-    
+
     /**renderTypeWithDetailObjectExtraJson => alternative method*/
     public String renderTypeWithDetailObjectExtraJson2(String memberType, String className, MethodDoc methodDoc) {
         String returnValue = memberType;
-        
+
         List<String> ignoreList = Arrays.asList("java.util.List","java.util.Collection", "java.util.ArrayList");
         if (ignoreList.contains(returnValue)) {
             final String deailsType = getReturnType(className, methodDoc);
@@ -1000,7 +999,7 @@ public class DocRestDoclet {
         }
         return returnValue;
     }
-    
+
     private boolean isGekkoOrDmiPackage(String type) {
         return type != null;
     }
@@ -1009,7 +1008,7 @@ public class DocRestDoclet {
         for (String t : jsonDocMap.keySet()) {
 
             // examples:
-            
+
             String findString = t;
 
             int diff = memberType.length() - findString.length() - memberType.indexOf(findString);
@@ -1028,22 +1027,22 @@ public class DocRestDoclet {
                     if (!jsonDocMap.containsKey(detailsType)) {
                         LOG.info("<<<<<<<<<<<<<<" + detailsType);
                         ClassDoc classDoc = rootDoc.classNamed(c.getName());
-                        //classDocs.containsKey(deailsType); 
+                        //classDocs.containsKey(deailsType);
                         jsonDocMapExtra.put(detailsType, classDoc);
                     }
-                    
+
                 } catch (ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }
-            
+
             returnValue = String.format("%s<<a href=\"api.html#%s\" class=\"link\">%s</a>>",returnValue, detailsType, detailsType);
         }
 
         return returnValue;
     }
 
-    
+
     public void setBasePath(String basePath) {
         this.basePath = basePath;
     }
@@ -1068,50 +1067,50 @@ public class DocRestDoclet {
         this.destinationFolder = destinationFolder;
     }
     public String getEndpoint (String readme) {
-       
-       if (readme.indexOf("[") == -1 || readme.indexOf("[") == -1 ) {
-           return null;
-       }
-       
-       String serverUrls =  readme.substring(readme.indexOf("["), readme.indexOf("]") + 1 );
-       
-       try {
+
+        if (readme.indexOf("[") == -1 || readme.indexOf("[") == -1 ) {
+            return null;
+        }
+
+        String serverUrls =  readme.substring(readme.indexOf("["), readme.indexOf("]") + 1 );
+
+        try {
             List<String> list = new ObjectMapper().readValue(serverUrls, ArrayList.class);
             LOG.info(String.format("============================ host name %s", getDomainName(list.get(0))));
             return getDomainName(list.get(0));
-       }
-       catch (JsonParseException e) {
+        }
+        catch (JsonParseException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-       }
-       catch (JsonMappingException e) {
+        }
+        catch (JsonMappingException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-       }
-       catch (IOException e) {
+        }
+        catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-       }
-       catch (URISyntaxException e) {
-           // TODO Auto-generated catch block
-           e.printStackTrace();
-       }
-       return null;
+        }
+        catch (URISyntaxException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
     }
-    
+
     public static String getDomainName(String url) throws URISyntaxException {
         URI uri = new URI(url);
         String domain = uri.getHost();
         return domain.startsWith("www.") ? domain.substring(4) : domain;
     }
-    
+
     public String getReadmeDescription (String readme) {
         if ( readme.indexOf("<pre>") == -1 || readme.indexOf("</pre>") == -1) {
             return null;
-        }    
+        }
         String newStr =  readme.substring(readme.indexOf("<pre>"), readme.lastIndexOf("</pre>") + 6 );
         return new StringEscapeUtils().escapeJava(((newStr)));
-     }
+    }
     protected Collection<Resource> traverse(RootDoc root) {
         this.rootDoc = root;
         vc.put("basePath", getBasePath());
@@ -1150,23 +1149,23 @@ public class DocRestDoclet {
                     // .qualifiedName());
                 } else if ("org.springframework.web.bind.annotation.RequestMapping".equals(type.qualifiedName())) {
                     paths = getValue(classAnnotation, "value");
-                } else  if (AuthorizationTest.class.getName().equals(type.qualifiedName()) || 
+                } else  if (AuthorizationTest.class.getName().equals(type.qualifiedName()) ||
                         "com.sma.security.annotation.Authorization".equals(type.qualifiedName())) {
-//                    //AuthorizationTest is for docrest testing , 
-//                    // and Authorization it is real annotation to be used in project integrated with user-security layer                   
-//                       //get internal define ROLEs ROLE_USER
-                        String[] userRoles =getValue(classAnnotation, "userRoles");
-                        StringBuilder traits = new StringBuilder();
-                        String comma = "";
-//                        //add all roles
-                        for (String userRole : userRoles) {
-                            traits.append(comma).append(userRole);
-                            comma = ",";
-                        }
-                        resource.addTrait(traits.toString());
-//                        method.addTrait(traits.toString());
-//                    }
-                    
+                    //                    //AuthorizationTest is for docrest testing ,
+                    //                    // and Authorization it is real annotation to be used in project integrated with user-security layer
+                    //                       //get internal define ROLEs ROLE_USER
+                    String[] userRoles =getValue(classAnnotation, "userRoles");
+                    StringBuilder traits = new StringBuilder();
+                    String comma = "";
+                    //                        //add all roles
+                    for (String userRole : userRoles) {
+                        traits.append(comma).append(userRole);
+                        comma = ",";
+                    }
+                    resource.addTrait(traits.toString());
+                    //                        method.addTrait(traits.toString());
+                    //                    }
+
                 } else if (RestReturn.class.getName().equals(type.qualifiedName())) {
                     resource.setIncludeApi(true);
                     resource.setName(classDoc.qualifiedName());
@@ -1189,11 +1188,11 @@ public class DocRestDoclet {
                                 resource.setSimpleType(className.substring(beginIndex + 1));
                             }
                         }
-//                            else if ("isSecured".equals(element.element().name())
-//                                && Boolean.TRUE.equals(getValueAsObject(classAnnotation, "isSecured"))) {
-//                            resource.addTrait("Secured");
-//
-//                        }
+                        //                            else if ("isSecured".equals(element.element().name())
+                        //                                && Boolean.TRUE.equals(getValueAsObject(classAnnotation, "isSecured"))) {
+                        //                            resource.addTrait("Secured");
+                        //
+                        //                        }
                     }
 
                     // If RestReturn.value or RestReturn.entity are not
@@ -1244,7 +1243,7 @@ public class DocRestDoclet {
         vc.put("encoder", new StringEscapeUtils());
         vc.put("jsonClass", jsonClassMap);
         vc.put("jsonDoc", jsonDocMap);
-        
+
         vc.put("readme", getReadme());
 
         String path;
@@ -1272,12 +1271,12 @@ public class DocRestDoclet {
             public int compare(Resource o1, Resource o2) {
                 // return
                 // o1.getEntityType().compareToIgnoreCase(o2.getEntityType());
-             // return o1.getName().compareToIgnoreCase(o2.getName()); // compare with controller name
-                return o1.getPaths()[0].compareToIgnoreCase(o2.getPaths()[0]); // compare path 
-                
+                // return o1.getName().compareToIgnoreCase(o2.getName()); // compare with controller name
+                return o1.getPaths()[0].compareToIgnoreCase(o2.getPaths()[0]); // compare path
+
             }
         });
-        
+
         return resources;
     }
 
@@ -1315,19 +1314,19 @@ public class DocRestDoclet {
             Method method = new Method(resource);
             StringBuilder traits = new StringBuilder();
             String comma = "";
-            //Authorization annotation    
+            //Authorization annotation
             for (AnnotationDesc methodAnnotation : methodDoc.annotations()) {
                 type = methodAnnotation.annotationType();
-                //AuthorizationTest is for docrest testing , 
+                //AuthorizationTest is for docrest testing ,
                 // and Authorization it is real annotation to be used in project integrated with user-security layer
-                if (AuthorizationTest.class.getName().equals(type.qualifiedName()) || 
+                if (AuthorizationTest.class.getName().equals(type.qualifiedName()) ||
                         "com.sma.security.annotation.Authorization".equals(type.qualifiedName())) {
-                   //get internal define ROLEs ROLE_USER
+                    //get internal define ROLEs ROLE_USER
                     String[] userRoles =getValue(methodAnnotation, "userRoles");
-                    
+
                     //add all roles
                     for (String userRole : userRoles) {
-                        
+
                         traits.append(comma).append(userRole);
                         comma = ",";
                     }
@@ -1373,7 +1372,7 @@ public class DocRestDoclet {
                             // Request mapping does not have a request type
                             // (GET, POST etc)
                             String message = "Fatal error: @RequestMapping " + classDoc.simpleTypeName() + "." + methodDoc.name()
-                                    + " is missing request type";
+                            + " is missing request type";
                             LOG.info(message);
                             throw new IllegalArgumentException(message);
                         }
@@ -1382,10 +1381,10 @@ public class DocRestDoclet {
                     } else {
                         method.setMethod("*");
                     }
-                    
+
                     //consumes = { MediaType.APPLICATION_JSON_VALUE } , ONLY
                     //method.setContentType(getValue(methodAnnotation, "consumes").toString());
-                    
+
                     traverseParameters(methodDoc, method);
 
                 }
@@ -1398,9 +1397,9 @@ public class DocRestDoclet {
                     // Set secured to the same values as the rest resource as
                     // default
                     // Can be overwritten by annotation on method level
-                   // if (resource.hasTrait("Secured")) {
-                   //     method.addTrait("Secured");
-                   // }
+                    // if (resource.hasTrait("Secured")) {
+                    //     method.addTrait("Secured");
+                    // }
 
                     //
                     include = true;
@@ -1429,15 +1428,15 @@ public class DocRestDoclet {
                             // element.value().value().toString());
                         } else if ("entity".equals(element.element().name())) {
                             method.setEntityType(element.value().value().toString());
-//                        } else if ("isSecured".equals(element.element().name())) {
-//                            if (Boolean.TRUE.equals(getValueAsObject(methodAnnotation, "isSecured"))) {
-//                                method.addTrait("Secured");
-//                            } else {
-//                                method.removeTrait("Secured");
-//                            }
+                            //                        } else if ("isSecured".equals(element.element().name())) {
+                            //                            if (Boolean.TRUE.equals(getValueAsObject(methodAnnotation, "isSecured"))) {
+                            //                                method.addTrait("Secured");
+                            //                            } else {
+                            //                                method.removeTrait("Secured");
+                            //                            }
                         } else if ("highlightApiMessage".equals(element.element().name())) {
                             //LOG.info("===============highlight messages================");
-                            if (!"".equals((String)getValueAsObject(methodAnnotation, "highlightApiMessage"))) {
+                            if (!"".equals(getValueAsObject(methodAnnotation, "highlightApiMessage"))) {
                                 method.setHighlightApiMessage((String)getValueAsObject(methodAnnotation, "highlightApiMessage"));
                                 LOG.info(">>>>>>>>>>>>>>>>>>>>>>>> " + method.getHighlightApiMessage());
                             }
@@ -1475,7 +1474,7 @@ public class DocRestDoclet {
                 // method.getReturnType()));
                 method.setJsonEntity(getJson(method.getReturnType(), null));
             }
-            
+
             //override Authorization Role from Resources
             if (CollectionUtils.isEmpty(method.getTraits()) && CollectionUtils.isNotEmpty(resource.getTraits())) {
                 method.setTraits(resource.getTraits());
@@ -1514,12 +1513,12 @@ public class DocRestDoclet {
                 } else if ("org.springframework.web.bind.annotation.RequestBody".equals(type.qualifiedName())) {
                     // param.setType(p.typeName());
                     // param.setJson(getJson(p.type().toString(), null));
-                  //supportsClassParams true and param must genericEntity
+                    //supportsClassParams true and param must genericEntity
                     if ((method.isSupportsClassParams() && "genericEntity".equals(param.getName()))
                             || "java.lang.Object".equals(p.type().qualifiedTypeName())) {
                         try {
-                        param.setType(getJson(method.getReturnType(), method.getEntityType()));
-                        param.setType2(method.getReturnType());
+                            param.setType(getJson(method.getEntityType(), method.getEntityType()));
+                            param.setType2(method.getReturnType());
                         } catch (Exception e) {
                             LOG.warning(method.getMethod() + " error : " + p.name() +  e.getMessage());
                             param.setType(getJson(p.type().qualifiedTypeName(), method.getEntityType()));
@@ -1527,7 +1526,7 @@ public class DocRestDoclet {
                         }
                     } else {
                         LOG.info(method.getMethod() + " : " + p.name() +  p.type().qualifiedTypeName());
-                        
+
                         param.setType(getJson(p.type().qualifiedTypeName(), null));
                         param.setType2(p.type().qualifiedTypeName());
                     }
@@ -1565,7 +1564,7 @@ public class DocRestDoclet {
                     if ("java.lang.Object".equals(p.type().qualifiedTypeName())) {
                         LOG.info("generic class Param : get class : get @RestReturn of Class Level: " + method.getEntityType() );
                         try {
-                            param.setType(getJson(method.getReturnType(), method.getEntityType()));
+                            param.setType(getJson(method.getEntityType(), method.getEntityType()));
                         } catch (Exception e) {
                             LOG.warning(method.getMethod() + " error : " + p.name() +  e.getMessage());
                             param.setType(getJson(p.type().qualifiedTypeName(), null));
@@ -1573,7 +1572,7 @@ public class DocRestDoclet {
                     } else {
                         //supportsClassParams true and param must genericEntity
                         if (method.isSupportsClassParams() && "genericEntity".equals(param.getName())) {
-                            param.setType(getJson(method.getReturnType(), method.getEntityType()));
+                            param.setType(getJson(method.getEntityType(), method.getEntityType()));
                         } else {
                             param.setType(getJson(p.type().qualifiedTypeName(), null));
                         }

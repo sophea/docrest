@@ -20,13 +20,13 @@ import com.wadpam.docrest.domain.RestCodes;
 import com.wadpam.docrest.domain.RestReturn;
 
 /**
- * @author os
+ * @author Sophea
  */
 public class AbstractController<T extends AbstractLongDomainEntity> {
 
     /**
      * Retrieves all entities of type T
-     * 
+     *
      * @param offset skip this number of entities before returning. Used for paging. Default is 0.
      * @param limit return this number of entities. Used for paging. Default is 10.
      * @return
@@ -38,18 +38,27 @@ public class AbstractController<T extends AbstractLongDomainEntity> {
     // return new ResponseEntity<List<T>>(HttpStatus.NOT_FOUND);
     // }
 
-    @RestReturn( highlightApiMessage = "Retrieves all entities of type T", value = List.class)
+    @RestReturn(highlightApiMessage = "Retrieves all entities of type T", value = ResponseList.class, supportsClassParams = true)
     @RequestMapping(value = "", method = RequestMethod.GET)
-    public ResponseEntity<List<T>> findAll(@RequestParam(defaultValue = "0") int offset,
+    public ResponseEntity<ResponseList<T>> findAll(@RequestParam(defaultValue = "0") int offset,
+            @RequestParam(defaultValue = "10") int limit, @ModelAttribute T genericEntity) {
+        return new ResponseEntity<ResponseList<T>>(HttpStatus.NOT_FOUND);
+    }
+
+    @RestReturn(highlightApiMessage = "Retrieves all entities of type T", value = ResponseList.class, supportsClassParams = true)
+    @RequestMapping(value = "all", method = RequestMethod.GET)
+    public ResponseEntity<ResponseList<T>> findAll2(@RequestParam(defaultValue = "0") int offset,
             @RequestParam(defaultValue = "10") int limit) {
-        return new ResponseEntity<List<T>>(HttpStatus.NOT_FOUND);
+        return new ResponseEntity<ResponseList<T>>(HttpStatus.NOT_FOUND);
     }
 
     /**
      * Lee's post test, Retrieves all entities of type T
-     * 
-     * @param offset skip this number of entities before returning. Used for paging. Default is 0.
-     * @param limit return this number of entities. Used for paging. Default is 10.
+     *
+     * @param offset
+     *            skip this number of entities before returning. Used for paging. Default is 0.
+     * @param limit
+     *            return this number of entities. Used for paging. Default is 10.
      * @return
      */
     @RestReturn( highlightApiMessage = "Retrieves all entities of type T", value = List.class)
@@ -67,14 +76,14 @@ public class AbstractController<T extends AbstractLongDomainEntity> {
      * @return
      */
     @RestReturn(highlightApiMessage = "create with id",
-           value = Object.class, entity= Object.class,
+            value = Object.class, entity = Object.class,
             codes = { @RestCodes(codes = "401, 403,200, 500") }, supportsClassParams = true)
     @RequestMapping(value = "created/{id}", method = RequestMethod.POST)
     public ResponseEntity<T> create(@PathVariable(value = "domain") String domainName, @ModelAttribute T genericEntity,
             @PathVariable("id") Long offerId) {
         return new ResponseEntity<T>(genericEntity, HttpStatus.OK);
     }
-    
+
     /**
      * create with json object
      * @param id
@@ -82,13 +91,13 @@ public class AbstractController<T extends AbstractLongDomainEntity> {
      * @return
      */
     @RestReturn(highlightApiMessage = "create with json object",
-           value = Object.class, entity= Object.class,
+            value = Object.class, entity = Object.class,
             codes = { @RestCodes(codes = "401, 403,200, 500") }, supportsClassParams = true)
     @RequestMapping(value = "created/{id}/json", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<T> createWithJson(@PathVariable(value = "id") String id, @RequestBody T genericEntity) {
         return new ResponseEntity<T>(genericEntity, HttpStatus.OK);
     }
-    
+
     /**
      * Get first entity
      * @param id
@@ -96,7 +105,7 @@ public class AbstractController<T extends AbstractLongDomainEntity> {
      * @return
      */
     @RestReturn(highlightApiMessage = "get first entity", value = ResponseEntity.class,
-     codes = { @RestCodes(codes = "401, 403,200, 500") }, supportsClassParams = true)
+            codes = {@RestCodes(codes = "401, 403,200, 500")}, supportsClassParams = true)
     @RequestMapping(value = "1st", method = RequestMethod.GET)
     public ResponseEntity<T> first(@ModelAttribute Child person) {
         return new ResponseEntity<T>(HttpStatus.NOT_FOUND);

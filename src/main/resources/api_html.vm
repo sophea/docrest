@@ -389,122 +389,126 @@
         
         <h1 class="resourceHeader">JSON Objects</h1>
         #foreach( $entry in $jsonDoc.entrySet() )
-            <!-- JSON object: ${entry.key} ---------------------------------------------------->        
-            <a name="${entry.key}" ></a>
-            <h2 class="methodHeader">${entry.key}</h2>
-            <table>
-                <thead>
-                    <td class="column1">Name</th>
-                    <td class="column2">Type</th>
-                    <td class="column3">Description</th>
-                </thead>
-                <tbody>
-                    #set( $className = $entry.key )
-                    #set( $jd = $entry.value )
-                    #set ($myMap = {})
-                    #set($parentMethods = $helper.getParentMethods($jd))
-                    #foreach( $m in $parentMethods )
-                        
-                        #set( $memberName = $helper.getMemberName($m.name()) )
-                        #set( $memberType = $m.returnType().qualifiedTypeName() )
-                        #if(!$helper.isJsonIgnoreFiledsWithParentClass($jd.qualifiedName(),$memberName))
-                                $!myMap.put("${memberName}","${memberName}")
-                                <tr>
-                                    <td>
-                                       ${memberName}
-                                    </td>
-                                    <td>${helper.renderTypeWithDetailObject($memberType, $className, $m)}</td>
-                                    <td>
-                                        ${helper.getFieldComment($jd,$memberName)}
-                                    </td>
-                                </tr>
-                        
-                        #end
-                    #end
-                    #foreach( $m in $jd.methods(false) )
-                        #if( $helper.isGetter($m.name()) )
+            #if(${entry.key} != "java.lang.String") 
+                <!-- JSON object: ${entry.key} ---------------------------------------------------->        
+                <a name="${entry.key}" ></a>
+                <h2 class="methodHeader">${entry.key}</h2>
+                <table>
+                    <thead>
+                        <td class="column1">Name</th>
+                        <td class="column2">Type</th>
+                        <td class="column3">Description</th>
+                    </thead>
+                    <tbody>
+                        #set( $className = $entry.key )
+                        #set( $jd = $entry.value )
+                        #set ($myMap = {})
+                        #set($parentMethods = $helper.getParentMethods($jd))
+                        #foreach( $m in $parentMethods )
+                            
                             #set( $memberName = $helper.getMemberName($m.name()) )
                             #set( $memberType = $m.returnType().qualifiedTypeName() )
-                            #if(!$helper.isJsonIgnoreFiled($jd.qualifiedName(),$memberName))
-                                  #if(!$myMap.get("${memberName}"))
+                            #if(!$helper.isJsonIgnoreFiledsWithParentClass($jd.qualifiedName(),$memberName))
+                                    $!myMap.put("${memberName}","${memberName}")
                                     <tr>
-                                        <td>${memberName} </td>
-                                        
-                                        <td>${helper.renderTypeWithDetailObject($memberType, $className,$m)}</td>
                                         <td>
-                                            #foreach( $f in $jd.fields(false) )
-                                                #if( $f.name() == $memberName )
-                                                    ${f.commentText()}
-                                                #end
-                                            #end
+                                           ${memberName}
+                                        </td>
+                                        <td>${helper.renderTypeWithDetailObject($memberType, $className, $m)}</td>
+                                        <td>
+                                            ${helper.getFieldComment($jd,$memberName)}
                                         </td>
                                     </tr>
-                                  #end
+                            
                             #end
                         #end
-                    #end
-                </tbody>
-            </table>
+                        #foreach( $m in $jd.methods(false) )
+                            #if( $helper.isGetter($m.name()) )
+                                #set( $memberName = $helper.getMemberName($m.name()) )
+                                #set( $memberType = $m.returnType().qualifiedTypeName() )
+                                #if(!$helper.isJsonIgnoreFiled($jd.qualifiedName(),$memberName))
+                                      #if(!$myMap.get("${memberName}"))
+                                        <tr>
+                                            <td>${memberName} </td>
+                                            
+                                            <td>${helper.renderTypeWithDetailObject($memberType, $className,$m)}</td>
+                                            <td>
+                                                #foreach( $f in $jd.fields(false) )
+                                                    #if( $f.name() == $memberName )
+                                                        ${f.commentText()}
+                                                    #end
+                                                #end
+                                            </td>
+                                        </tr>
+                                      #end
+                                #end
+                            #end
+                        #end
+                    </tbody>
+                </table>
+           #end
         #end
          <!-- Extra Json Objects  -->
          #set($jsonExtra = $helper.getJsonDocMapExtra())
          #foreach( $entry in $jsonExtra.entrySet() )
-            <!-- JSON object: ${entry.key} ---------------------------------------------------->        
-            <a name="${entry.key}" ></a>
-            <h2 class="methodHeader">${entry.key}</h2>
-            <table>
-                <thead>
-                    <td class="column1">Name</th>
-                    <td class="column2">Type</th>
-                    <td class="column3">Description</th>
-                </thead>
-                <tbody>
-                    #set( $className = $entry.key )
-                    #set( $jd = $entry.value )
-                    #set ($myMap = {})
-                    #set($parentMethods = $helper.getParentMethods($jd))
-                    #foreach( $m in $parentMethods )
-                        
-                        #set( $memberName = $helper.getMemberName($m.name()) )
-                        #set( $memberType = $m.returnType().qualifiedTypeName() )
-                        #if(!$helper.isJsonIgnoreFiled($memberName))
-                            $!myMap.put("${memberName}","${memberName}")
-                                <tr>
-                                    <td>
-                                        ${memberName}
-                                    </td>
-                                    <td>${helper.renderTypeWithDetailObjectExtraJson($memberType, $className,$m)}</td>
-                                    <td>
-                                        ${helper.getFieldComment($jd,$memberName)}
-                                    </td>
-                                </tr>
-                        
-                        #end
-                    #end
-                    #foreach( $m in $jd.methods(false) )
-                        #if( $helper.isGetter($m.name()) )
+            <!-- JSON object: ${entry.key} ---------------------------------------------------->
+            #if(${entry.key} != "java.lang.String")
+                <a name="${entry.key}" ></a>
+                <h2 class="methodHeader">${entry.key}</h2>
+                <table>
+                    <thead>
+                        <td class="column1">Name</th>
+                        <td class="column2">Type</th>
+                        <td class="column3">Description</th>
+                    </thead>
+                    <tbody>
+                        #set( $className = $entry.key )
+                        #set( $jd = $entry.value )
+                        #set ($myMap = {})
+                        #set($parentMethods = $helper.getParentMethods($jd))
+                        #foreach( $m in $parentMethods )
+                            
                             #set( $memberName = $helper.getMemberName($m.name()) )
                             #set( $memberType = $m.returnType().qualifiedTypeName() )
-                            #if(!$helper.isJsonIgnoreFiled($jd.qualifiedName(),$memberName))
-                                  #if(!$myMap.get("${memberName}"))
+                            #if(!$helper.isJsonIgnoreFiled($memberName))
+                                $!myMap.put("${memberName}","${memberName}")
                                     <tr>
-                                        <td>${memberName} </td>
-                                        
-                                        <td>${helper.renderTypeWithDetailObjectExtraJson($memberType, $className, $m)}</td>
                                         <td>
-                                            #foreach( $f in $jd.fields(false) )
-                                                #if( $f.name() == $memberName )
-                                                    ${f.commentText()}
-                                                #end
-                                            #end
+                                            ${memberName}
+                                        </td>
+                                        <td>${helper.renderTypeWithDetailObjectExtraJson($memberType, $className,$m)}</td>
+                                        <td>
+                                            ${helper.getFieldComment($jd,$memberName)}
                                         </td>
                                     </tr>
-                                  #end
+                            
                             #end
                         #end
-                    #end
-                </tbody>
-            </table>
+                        #foreach( $m in $jd.methods(false) )
+                            #if( $helper.isGetter($m.name()) )
+                                #set( $memberName = $helper.getMemberName($m.name()) )
+                                #set( $memberType = $m.returnType().qualifiedTypeName() )
+                                #if(!$helper.isJsonIgnoreFiled($jd.qualifiedName(),$memberName))
+                                      #if(!$myMap.get("${memberName}"))
+                                        <tr>
+                                            <td>${memberName} </td>
+                                            
+                                            <td>${helper.renderTypeWithDetailObjectExtraJson($memberType, $className, $m)}</td>
+                                            <td>
+                                                #foreach( $f in $jd.fields(false) )
+                                                    #if( $f.name() == $memberName )
+                                                        ${f.commentText()}
+                                                    #end
+                                                #end
+                                            </td>
+                                        </tr>
+                                      #end
+                                #end
+                            #end
+                        #end
+                    </tbody>
+                </table>
+              #end
         #end
         </div>
     </body>
