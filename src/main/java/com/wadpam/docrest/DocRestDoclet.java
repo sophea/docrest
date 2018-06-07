@@ -155,6 +155,7 @@ public class DocRestDoclet {
             }
 
         });
+
         // List all of attributes of the entity
         for (int i = 0; i < fields.length; i++) {
             //ignore
@@ -205,14 +206,43 @@ public class DocRestDoclet {
                                 sb.append(fields[i].getType().getSimpleName());
                             }
                         }
-                        if (i < fields.length - 1) {
-                            sb.append(',');
-                        }
+                        // if (i < fields.length - 1) {
+                        sb.append(',');
+                        // }
                         sb.append("</div>");
                     }
                 }
             }
         }
+
+        // List for getXXXX method
+        // sb.append("<br>=========" + entityName);
+        java.lang.reflect.Method methods[] = c.getMethods();
+        // xxxx
+        for (java.lang.reflect.Method item : methods) {
+            if (isGetter(item.getName())) {
+                String fieldName = getMemberName(item.getName());
+                if ("class".equals(fieldName) || isJsonIgnoreFiledsWithParentClass(entityName, fieldName)
+                        || ignoreProperties.contains(fieldName)
+                        || isJsonIgnoreFiled(entityName, fieldName)) {
+                    continue;
+                }
+
+                String fieldNameValue = String.format("<b>\"%s\"</b>:", fieldName);
+                if (sb.toString().contains(fieldNameValue)) {
+                    continue;
+                }
+                sb.append("<div>");
+                sb.append(indent);
+                sb.append(INDENT);
+                // sb.append("===" + item.getName());
+                sb.append(fieldNameValue);
+                sb.append(item.getReturnType().getSimpleName());
+                sb.append(',');
+                sb.append("</div>");
+            }
+        }
+
     }
 
     protected static String getTypeQualifiedName(String className) {
@@ -330,6 +360,12 @@ public class DocRestDoclet {
                     // display deeper, more detail, not only simple name here
                     Class c = genericClass != null ? Class.forName(genericClass) : null;
                     appendJsonMembers(sb, entityName, indent, null, c);
+
+                    int length = sb.length();
+                    // replace last
+                    if (length > 10) {
+                        sb.replace(length - 7, length, "</div>");
+                    }
                 } catch (ClassNotFoundException e) {
                     LOG.info("ERROR:" + e.getMessage());
 
@@ -435,7 +471,7 @@ public class DocRestDoclet {
 
     public String getReturnType(String className, MethodDoc methodDoc) {
         String methodName = methodDoc.name();
-        LOG.info("-------------- Method name: " + methodName);
+        // LOG.info("-------------- Method name: " + methodName);
         try {
 
             Class<?> c = Class.forName(className);
@@ -583,8 +619,10 @@ public class DocRestDoclet {
 
     public static boolean isJsonIgnoreFiled(Field field) {
 
+        if (field == null) {
+            return false;
+        }
         boolean isJsonIgnore = false;
-
         for (Annotation annotation : field.getAnnotations()) {
             LOG.info("Found annotation " + annotation.annotationType() + " in field " + field);
             // Check whether this annotation is JsonIgnore of jackson from
@@ -648,7 +686,7 @@ public class DocRestDoclet {
                     return true;
                 }
             }
-        } catch (ClassNotFoundException exc) {
+        } catch (Exception exc) {
             // Do nothing
         }
         return false;

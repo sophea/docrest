@@ -14,7 +14,7 @@ import com.wadpam.docrest.domain.RestReturn;
 
 /**
  * Child resource.
- * 
+ *
  * @author Mattias
  */
 @RestReturn(isSecured = true)
@@ -22,11 +22,11 @@ import com.wadpam.docrest.domain.RestReturn;
 @RequestMapping(value = { "child" })
 public class ChildController extends CrudController {
 
-    
+
     /**
      * Delete a child entity.
      * this method is protected
-     * 
+     *
      * @param id the id of the child entity to delete
      * @return 200 if deleted successfully, empty body
      */
@@ -40,7 +40,7 @@ public class ChildController extends CrudController {
     /**
      * Get user with id
      * this method is not protected
-     * 
+     *
      * @param id the id of the user entity
      * @return 200 if get successfully, empty body
      */
@@ -51,11 +51,11 @@ public class ChildController extends CrudController {
         Child child = new Child();
         return new ResponseEntity<Child>(child, HttpStatus.OK);
     }
-    
+
     /**
      * Get entity detail with id
      * this method is not protected
-     * 
+     *
      * @param id the id of the user entity
      * @return 200 if get successfully, empty body
      */
@@ -70,7 +70,7 @@ public class ChildController extends CrudController {
     /**
      * Get a child entity.
      * This method is not protected
-     * 
+     *
      * @param id the id of the child entity
      * @return JSON representation of the child entity
      */
@@ -81,15 +81,15 @@ public class ChildController extends CrudController {
         Child child = new Child();
         return new ResponseEntity<Child>(child, HttpStatus.OK);
     }
-    
+
     /**
      * Get entity with post
      * this method is not protected
-     * 
+     *
      * @param id the id of the user entity
      * @return 200 if get successfully, empty body
      */
-    @RestReturn(highlightApiMessage = "get entity with post", value = Child.class,
+    @RestReturn(highlightApiMessage = "get entity with post", value = Child.class, entity = Child.class,
             codes = { @RestCodes(codes = "401, 403,200, 500") }, supportsClassParams = true)
     @RequestMapping(value = "admin/oauth2/v1/user/{id}", method = RequestMethod.POST)
     public ResponseEntity<Child> getUserWithPost(@PathVariable String id) {
@@ -104,23 +104,23 @@ public class ChildController extends CrudController {
      * @param id the id of the user entity
      * @return 200 if get successfully, empty body
      */
-    @RestReturn(highlightApiMessage = "update entity with json", value = Child.class,
+    @RestReturn(highlightApiMessage = "update entity with json", value = Child.class, entity = Child.class,
             codes = { @RestCodes(codes = "401, 403,200, 500") }, supportsClassParams = true)
     @RequestMapping(value = "admin/oauth2/v1/update", method = RequestMethod.POST, consumes = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<Child> updateUser(@RequestBody Child body) {
         Child child = new Child();
         return new ResponseEntity<Child>(child, HttpStatus.OK);
     }
-    
+
     /**
      * Get first method
      * this method is not protected
-     * 
+     *
      * @param id the id of the user entity
      * @return 200 if get successfully, empty body
      */
-    @RestReturn(highlightApiMessage = "get first method", value = Child.class,
-     codes = { @RestCodes(codes = "401, 403,200, 500") }, supportsClassParams = true)
+    @RestReturn(highlightApiMessage = "get first method", value = Child.class, entity = Child.class,
+            codes = { @RestCodes(codes = "401, 403,200, 500") }, supportsClassParams = true)
     @RequestMapping(value = "1st/{id}", method = RequestMethod.GET)
     public ResponseEntity<Child> getFirstMethod(@PathVariable String id) { // 5
         Child child = new Child();
