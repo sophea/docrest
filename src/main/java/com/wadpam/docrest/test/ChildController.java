@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.wadpam.docrest.domain.RestCodes;
@@ -22,6 +23,16 @@ import com.wadpam.docrest.domain.RestReturn;
 @RequestMapping(value = { "child" })
 public class ChildController extends CrudController {
 
+
+
+    @RestReturn(highlightApiMessage = "exchange accessToken", value=AccessToken.class, entity=AccessToken.class, codes = {
+            @RestCodes(codes = "401, 403,200, 500")}, supportsClassParams = true)
+    @RequestMapping(value = "login", method = RequestMethod.POST)
+    @AuthorizationTest(userRoles = {"ROLE_USER"})
+    public ResponseEntity<AccessToken> pathSomethod(@RequestParam String username, @RequestParam String password) {
+
+        return new ResponseEntity<>(new AccessToken(), HttpStatus.OK);
+    }
 
     /**
      * Delete a child entity.

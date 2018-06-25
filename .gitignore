@@ -3,3 +3,5 @@ target/
 **/*.*~
 *.releaseBackup
 release.properties
+.idea/
+docrest-doclet.iml

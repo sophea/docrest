@@ -45,6 +45,7 @@ import org.apache.velocity.app.Velocity;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -163,14 +164,21 @@ public class DocRestDoclet {
             // exclude static field
             if (!isStaticField(fields[i])) {
 
+                String fieldName = fields[i].getName();
                 // @JsonIgnore excluded and @JsonIgnorProperies excluded
-                if (!isJsonIgnoreFiled(fields[i])  ) {
+                if (!isJsonIgnoreFiled(fields[i])) {
                     if (!ignoreProperties.contains(fields[i].getName())) {
-
-                        String fieldNameValue = String.format("<b>\"%s\"</b>:", fields[i].getName());
+                        try {
+                            // check fieldName contact @fieldName()
+                            fieldName = getJsonPropertyFiled(fields[i], fieldName);
+                        }
+                        catch (Exception e) {
+                        }
+                        String fieldNameValue = String.format("<b>\"%s\"</b>:", fieldName);
                         if (sb.toString().contains(fieldNameValue)) {
                             continue;
                         }
+
                         sb.append("<div>");
                         sb.append(indent);
                         sb.append(INDENT);
@@ -228,6 +236,13 @@ public class DocRestDoclet {
                     continue;
                 }
 
+                try {
+                    Field field = c.getDeclaredField(fieldName);
+                    fieldName = getJsonPropertyFiled(field, fieldName);
+                }
+                catch (Exception e) {
+                }
+
                 String fieldNameValue = String.format("<b>\"%s\"</b>:", fieldName);
                 if (sb.toString().contains(fieldNameValue)) {
                     continue;
@@ -243,6 +258,24 @@ public class DocRestDoclet {
             }
         }
 
+    }
+
+    public static String getJsonPropertyFiled(Field field, String name) {
+
+        if (field == null) {
+            return null;
+        }
+        for (Annotation annotation : field.getAnnotations()) {
+            LOG.info("Found annotation " + annotation.annotationType() + " in field " + field);
+            if ("JsonProperty".equals(annotation.annotationType().getSimpleName()) || annotation.annotationType()
+                    .getName().contains("JsonProperty")) {
+
+
+                return   field.getAnnotation(JsonProperty.class).value();
+            }
+        }
+
+        return name;
     }
 
     protected static String getTypeQualifiedName(String className) {
@@ -628,7 +661,7 @@ public class DocRestDoclet {
             // Check whether this annotation is JsonIgnore of jackson from
             // codehaus or fasterxml
             if ("JsonIgnore".equals(annotation.annotationType().getSimpleName())
-                    | annotation.annotationType().getPackage().getName().contains("jackson")) {
+                    | annotation.annotationType().getName().contains("JsonIgnore")) {
                 isJsonIgnore = true;
                 break;
             }
@@ -645,7 +678,7 @@ public class DocRestDoclet {
             // Check whether this annotation is JsonIgnoreProperties of jackson
             // from codehaus or fasterxml
             if ("JsonIgnoreProperties".equals(annotation.annotationType().getSimpleName())
-                    && annotation.annotationType().getPackage().getName().contains("jackson")) {
+                    && annotation.annotationType().getName().contains("JsonIgnoreProperties")) {
                 String[] values = getAnnotationMethodStringArrayValue(annotation);
                 if (values != null) {
                     result.addAll(Arrays.asList(values));
